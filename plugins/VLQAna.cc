@@ -254,7 +254,7 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
 
   /// Create Event Shape Varibless
   std::vector<math::XYZVector> inputVectors;
-  for ( vlq::Jet& hjet : goodHTaggedJets ){
+  for ( vlq::Jet& hjet : goodAK4Jets ){
   	inputVectors.push_back(math::XYZVector(hjet.getP4().x(), hjet.getP4().y(), hjet.getP4().z()));
   }
   eventshapes(inputVectors);
