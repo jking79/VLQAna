@@ -85,6 +85,7 @@ vlq::EventShapeVariables::compMomentumTensor(double r) const
   double norm = 0.;
   for ( int i = 0; i < (int)inputVectors_.size(); ++i ){
 
+
     double p2 = inputVectors_[i].P()*inputVectors_[i].P();
     if( p2 == 0 ){ p2 = 1; }
 
@@ -217,6 +218,7 @@ vlq::EventShapeVariables::thrust( unsigned int numberOfSteps ) const
 double
 vlq::EventShapeVariables::thrustminor( unsigned int numberOfSteps ) const
 {
+
 
 
 	TVectorD eigenValues = compEigenValues(1);	
