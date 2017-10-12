@@ -84,7 +84,7 @@ vlq::EventShapeVariables::compMomentumTensor(double r) const
   // fill momentumTensor from inputVectors
   double norm = 0.;
   for ( int i = 0; i < (int)inputVectors_.size(); ++i ){
-    double p2 = inputVectors_[i].P()*inputVectors_[i].P();
+    double p2 = inputVectors_[i].Mag2();
     if( p2 == 0 ){ p2 = 1; }
     double pR = ( r == 2. ) ? p2 : TMath::Power(p2, 0.5*r);
     norm += pR;

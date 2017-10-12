@@ -43,12 +43,12 @@ options.register('jerShift', 1,
     VarParsing.varType.int,
     "JER shift"
     )
-options.register('topTagtau32', 0.54,
+options.register('topTagtau32', 0.5,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Top-tagging tau32 cut"
     )
-options.register('topTagBDisc', 0.79,
+options.register('topTagBDisc', 0.5426,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Top-tagging b-discriminator cut"
@@ -68,7 +68,7 @@ options.register('applyBTagSFs', True,
     VarParsing.varType.bool,
     "Apply b-tagging SFs to the MC"
     )
-options.register('btageffmap', "btagEff_TtH_1200_loose.root",#until new SFs arrive
+options.register('btageffmap', "btagEff_Tbq_LH_loose.root",#until new SFs arrive
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "ROOT file with Th2D histos of b tag effs for b,c, and light flavoured jets"
@@ -83,7 +83,7 @@ options.register('storeLHEWts', False,
     VarParsing.varType.bool,
     "Store LHE wts?"
     )
-options.register('FileNames', 'test',
+options.register('FileNames', 'TbtH_1800_LH',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Name of list of input files"
@@ -124,7 +124,7 @@ if options.isData:
     options.doPUReweightingOfficial=False 
     options.storeLHEWts=False
     options.applyBTagSFs = False
-HTMin=1100
+#HTMin=1100
 if options.storePreselEvts:
   HTMin = options.HTMin
 
@@ -145,7 +145,8 @@ process.TFileService = cms.Service("TFileService",
       )
     )
 #dataFilePath = "$CMSSW_BASE/src/Analysis/VLQAna/data/"
-dataFilePath = './'
+dataFilePath = '../data/'
+#dataFilePath = './'
 process.load("Analysis.VLQAna.EventCleaner_cff") 
 process.evtcleaner.hltORAND = cms.string (options.hltORAND)  
 process.evtcleaner.hltPaths = cms.vstring (hltpathsOr)  
@@ -204,8 +205,6 @@ process.ana.jetZTaggedselParams.jecShift = options.jecShift
 process.ana.jetZTaggedselParams.jerShift = options.jerShift 
 process.ana.jetAntiZTaggedselParams.jecShift = options.jecShift 
 process.ana.jetAntiZTaggedselParams.jerShift = options.jerShift 
-process.ana.jetTopTaggedselParams.jettau3Bytau2Max = options.topTagtau32
-process.ana.jetTopTaggedselParams.subjetHighestCSVMin = options.topTagBDisc
 process.ana.storePreselEvts = options.storePreselEvts
 process.ana.doPreselOnly = options.doPreselOnly
 process.ana.HTMin = HTMin
