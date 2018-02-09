@@ -8,7 +8,7 @@
 
 class MuonMaker {
   public:
-    enum MUONIDTYPES_t {LOOSE, TIGHT} ; 
+    enum MUONIDTYPES_t {LOOSE, MEDIUM, TIGHT} ; 
     MuonMaker (edm::ParameterSet const&, edm::ConsumesCollector && iC) ; 
     ~MuonMaker () ; 
     void operator () (edm::Event& evt, vlq::MuonCollection& muons) ; 
@@ -32,6 +32,7 @@ class MuonMaker {
     edm::EDGetTokenT<std::vector<float>> t_muIsPFMuon                 ;
     edm::EDGetTokenT<std::vector<float>> t_muIsSoftMuon               ;
     edm::EDGetTokenT<std::vector<float>> t_muIsTightMuon              ;
+    edm::EDGetTokenT<std::vector<float>> t_muIsMediumMuon              ;
     edm::EDGetTokenT<std::vector<float>> t_muIsTrackerMuon            ;
     edm::EDGetTokenT<std::vector<float>> t_muIso04                    ;
     edm::EDGetTokenT<std::vector<float>> t_muKey                      ;
