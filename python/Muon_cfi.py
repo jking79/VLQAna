@@ -18,6 +18,7 @@ defaultMuonParameters = cms.PSet(
     muIsPFMuonLabel                 = cms.InputTag("muons", "muIsPFMuon"), 
     muIsSoftMuonLabel               = cms.InputTag("muons", "muIsSoftMuon"), 
     muIsTightMuonLabel              = cms.InputTag("muons", "muIsTightMuon"), 
+    muIsMediumMuonLabel              = cms.InputTag("muons", "muIsTightMuon"), 
     muIsTrackerMuonLabel            = cms.InputTag("muons", "muIsTrackerMuon"), 
     muIso04Label                    = cms.InputTag("muons", "muIso04"), 
     muKeyLabel                      = cms.InputTag("muons", "muKey"), 
