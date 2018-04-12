@@ -21,6 +21,9 @@ class TtHEventInfoBranches {
     double EvtWtPV_;
     double EvtWtPVLow_;
     double EvtWtPVHigh_;
+    double EvtWtPVAlt_;
+    double EvtWtPVAltLow_;
+    double EvtWtPVAltHigh_;
     double EvtWtHT_;
     double EvtWtHTUp_;
     double EvtWtHTDown_;
@@ -110,6 +113,9 @@ class TtHEventInfoBranches {
       cutTree->Branch((name+"_EvtWtPV").c_str(), &EvtWtPV_, "EvtWtPV/D");
       cutTree->Branch((name+"_EvtWtPVLow").c_str(), &EvtWtPVLow_, "EvtWtPVLow/D");
       cutTree->Branch((name+"_EvtWtPVHigh").c_str(), &EvtWtPVHigh_, "EvtWtPVHigh/D");
+      cutTree->Branch((name+"_EvtWtPVAlt").c_str(), &EvtWtPVAlt_, "EvtWtPVAlt/D");
+      cutTree->Branch((name+"_EvtWtPVAltLow").c_str(), &EvtWtPVAltLow_, "EvtWtPVAltLow/D");
+      cutTree->Branch((name+"_EvtWtPVAltHigh").c_str(), &EvtWtPVAltHigh_, "EvtWtPVAltHigh/D");
       cutTree->Branch((name+"_EvtWtHT").c_str(), &EvtWtHT_, "EvtWtHT/D");
       cutTree->Branch((name+"_EvtWtHTUp").c_str(), &EvtWtHTUp_, "EvtWtHTUp/D");
       cutTree->Branch((name+"_EvtWtHTDown").c_str(), &EvtWtHTDown_, "EvtWtHTDown/D");

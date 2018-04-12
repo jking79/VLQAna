@@ -183,6 +183,7 @@ process.evtcleanerH.File_PUDistData = cms.string(os.path.join(dataFilePath,'RunI
 process.evtcleanerH.storeLHEWts = cms.bool(False)
 process.evtcleanerH.storeTrigBits = cms.bool(False)
 
+
 from Analysis.VLQAna.VLQAna_cfi import *
 
 if options.isData == False: ### Careful, to be reset when B2GAnaFW_v80X_v2.4 MC are used
@@ -437,6 +438,7 @@ process.p = cms.Path(
     *process.evtcleaner
     *process.evtcleanerBG
     *process.evtcleanerH
+    *process.evtcleanerAlt
     *process.cleanedEvents
     *process.anaCHS 
     *process.finalEvents
@@ -451,6 +453,7 @@ process.pJERUp = cms.Path(
     *process.anaJERUp 
     *process.finalEventsJERUp
     )
+<<<<<<< HEAD
 process.pJERDown = cms.Path(
     process.allEvents
     *process.evtcleanerJERDown
