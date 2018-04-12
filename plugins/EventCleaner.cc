@@ -74,6 +74,7 @@ class EventCleaner : public edm::EDFilter {
     const std::string hist_PUDistMC_                       ;
     const bool cleanEvents_                                ; 
     const bool storeLHEWts_                                ;
+    const bool storeTrigBits_                                ;
     edm::EDGetTokenT<GenEventInfoProduct> t_genEvtInfoProd ; 
     edm::EDGetTokenT<LHEEventProduct> t_lheEvtProd         ; 
     std::vector<std::string> lhe_weight_labels_            ;
@@ -129,6 +130,7 @@ EventCleaner::EventCleaner(const edm::ParameterSet& iConfig) :
   hist_PUDistMC_             (iConfig.getParameter<std::string>              ("Hist_PUDistMC")),
   cleanEvents_               (iConfig.getParameter<bool>                     ("cleanEvents")),
   storeLHEWts_               (iConfig.getParameter<bool>                     ("storeLHEWts")),
+  storeTrigBits_             (iConfig.getParameter<bool>                     ("storeTrigBits")),
   TtZParams_                 (iConfig.getParameter<edm::ParameterSet>        ("TtZParams")),  
   TtHParams_                 (iConfig.getParameter<edm::ParameterSet>        ("TtHParams")),  
   TbWParams_                 (iConfig.getParameter<edm::ParameterSet>        ("TbWParams")),  
@@ -186,6 +188,8 @@ EventCleaner::EventCleaner(const edm::ParameterSet& iConfig) :
   produces<double>("htHat");
   produces<std::vector<int>>("lhewtids") ; 
   produces<std::vector<double>>("lhewts") ; 
+  produces<std::vector<std::string>>("trigName"); 
+  produces<std::vector<double>>("trigBit") ; 
 
 }
 
@@ -247,6 +251,17 @@ bool EventCleaner::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
     }
   }
 
+  std::vector<double> trigBit;
+  std::vector<std::string> trigName;
+  if ( storeTrigBits_) {
+    trigBit.reserve(h_trigBit.product()->size());
+    trigName.reserve(h_trigName.product()->size());
+    vector<std::string>::const_iterator it;
+    for (it = h_trigName.product()->begin(); it != (h_trigName.product())->end(); ++it) trigName.push_back(*it);
+    vector<float>::const_iterator it_bit;
+    for (it_bit = h_trigBit.product()->begin(); it_bit != (h_trigBit.product())->end(); ++it_bit) trigBit.push_back(*it_bit);
+  }
+        
   bool metfilterdecision(1) ; 
   if ( *h_BadChargedCandidateFilter.product() == false || *h_BadPFMuonFilter.product() == false) return false;
   if ( isData_ ) {
@@ -263,7 +278,13 @@ bool EventCleaner::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
 
   const int npv(*h_npv) ; 
 
-  double evtwtGen(1.0) ; 
+  double evtwtGen(1.0) ;
+  if (!(isData_)){
+    Handle<GenEventInfoProduct> h_genEvtInfoProd;
+    evt.getByToken(t_genEvtInfoProd, h_genEvtInfoProd);
+    evtwtGen = h_genEvtInfoProd->weight() ;
+    evtwtGen /= std::abs(evtwtGen) ;
+  }
   double htHat(0.0);
   std::vector<int> lhewtids;
   std::vector<double> lhewts;
@@ -293,7 +314,7 @@ bool EventCleaner::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
     lhewtids.push_back(-999999);
     lhewts.push_back(-999999) ;
   }
-
+    
   int npuTrue(-1);
   double evtwtPV(1.0) ;
   double evtwtPVLow(1.0) ;
@@ -349,6 +370,8 @@ bool EventCleaner::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   unique_ptr<double>ptr_htHat(new double(htHat)); 
   unique_ptr<std::vector<int>> ptr_lhewtids(new std::vector<int>(lhewtids));
   unique_ptr<std::vector<double>> ptr_lhewts(new std::vector<double>(lhewts));
+  unique_ptr<std::vector<double>> ptr_trigBit(new std::vector<double>(trigBit));
+  unique_ptr<std::vector<std::string>> ptr_trigName(new std::vector<std::string>(trigName));
 
   evt.put(std::move(ptr_evtno), "evtno");
   evt.put(std::move(ptr_lumisec), "lumisec");
@@ -365,6 +388,8 @@ bool EventCleaner::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   evt.put(std::move(ptr_htHat), "htHat");
   evt.put(std::move(ptr_lhewtids), "lhewtids") ;
   evt.put(std::move(ptr_lhewts), "lhewts") ;
+  evt.put(std::move(ptr_trigBit), "trigBit") ;
+  evt.put(std::move(ptr_trigName), "trigName") ;
 
   return true ; 
 

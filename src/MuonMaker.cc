@@ -21,7 +21,9 @@ MuonMaker::MuonMaker (edm::ParameterSet const& iConfig, edm::ConsumesCollector &
   t_muIsLooseMuon              (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muIsLooseMuonLabel"))), 
   t_muIsPFMuon                 (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muIsPFMuonLabel"))), 
   t_muIsSoftMuon               (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muIsSoftMuonLabel"))), 
+  t_muIsHighPtMuon              (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muIsHighPtMuonLabel"))), 
   t_muIsTightMuon              (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muIsTightMuonLabel"))), 
+  t_muIsMediumMuon              (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muIsMediumMuonLabel"))), 
   t_muIsTrackerMuon            (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muIsTrackerMuonLabel"))), 
   t_muIso04                    (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muIso04Label"))), 
   t_muKey                      (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("muKeyLabel"))), 
@@ -45,7 +47,9 @@ MuonMaker::MuonMaker (edm::ParameterSet const& iConfig, edm::ConsumesCollector &
 {
   std::string muidtypestr = iConfig.getParameter<std::string>("muidtype") ; 
   if ( muidtypestr == "LOOSE" ) type_ = LOOSE ; 
+  else if ( muidtypestr == "MEDIUM" ) type_ = MEDIUM ; 
   else if ( muidtypestr == "TIGHT" ) type_ = TIGHT ; 
+  else if ( muidtypestr == "HIGHPT" ) type_ = HIGHPT ; 
   else edm::LogError("MuonMaker::MuonMaker") << " >>>> WrongMuonIdType: " << type_<< " Check muon id type !!!" ; 
 }
 
@@ -69,7 +73,9 @@ void MuonMaker::operator () (edm::Event& evt, vlq::MuonCollection& muons) {
   Handle<vector<float>> h_muIsLooseMuon             ; evt.getByToken(t_muIsLooseMuon             ,h_muIsLooseMuon             );
   Handle<vector<float>> h_muIsPFMuon                ; evt.getByToken(t_muIsPFMuon                ,h_muIsPFMuon                );
   Handle<vector<float>> h_muIsSoftMuon              ; evt.getByToken(t_muIsSoftMuon              ,h_muIsSoftMuon              );
+  Handle<vector<float>> h_muIsHighPtMuon             ; evt.getByToken(t_muIsHighPtMuon             ,h_muIsHighPtMuon             );
   Handle<vector<float>> h_muIsTightMuon             ; evt.getByToken(t_muIsTightMuon             ,h_muIsTightMuon             );
+  Handle<vector<float>> h_muIsMediumMuon             ; evt.getByToken(t_muIsMediumMuon             ,h_muIsMediumMuon             );
   Handle<vector<float>> h_muIsTrackerMuon           ; evt.getByToken(t_muIsTrackerMuon           ,h_muIsTrackerMuon           );
   Handle<vector<float>> h_muIso04                   ; evt.getByToken(t_muIso04                   ,h_muIso04                   );
   Handle<vector<float>> h_muKey                     ; evt.getByToken(t_muKey                     ,h_muKey                     );
@@ -94,9 +100,13 @@ void MuonMaker::operator () (edm::Event& evt, vlq::MuonCollection& muons) {
 
     bool passMuId(false) ; 
     bool isLooseMu((h_muIsLooseMuon.product())->at(imu) > 0) ; 
+    bool isMediumMu((h_muIsMediumMuon.product())->at(imu) > 0) ;
     bool isTightMu((h_muIsTightMuon.product())->at(imu) > 0) ;
+    bool isHighPtMu((h_muIsHighPtMuon.product())->at(imu) > 0) ;
     if (type_ == LOOSE && isLooseMu) passMuId = true ;
+    else if (type_ == MEDIUM && isMediumMu) passMuId = true ;
     else if (type_ == TIGHT && isTightMu) passMuId = true ;
+    else if (type_ == HIGHPT && isHighPtMu) passMuId = true ;
     else passMuId = false;
 
     if ( muPt >= muPtMin_ && muPt < muPtMax_ && muAbsEta <= muAbsEtaMax_ 

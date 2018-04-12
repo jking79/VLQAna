@@ -2,7 +2,7 @@
 #include "Analysis/VLQAna/interface/ApplyJER.h"
 #include "Analysis/VLQAna/interface/Utilities.h"
 
-#include <TRandom.h>
+#include <TRandom3.h>
 
 #define DEBUGMORE false 
 #define DEBUG false  
@@ -21,7 +21,8 @@ JetMaker::JetMaker (edm::ParameterSet const& iConfig, edm::ConsumesCollector && 
   scaleJetP4_               (iConfig.getParameter<bool>                    ("scaleJetP4")), 
   scaledJetMass_            (iConfig.getParameter<double>                  ("scaledJetMass")), 
   jecShift_                 (iConfig.getParameter<double>                  ("jecShift")), 
-  jerShift_                 (iConfig.getParameter<int>                     ("jerShift")), 
+  jerShift_                 (iConfig.getParameter<int>                     ("jerShift")),
+  jmrShift_                 (iConfig.getParameter<int>                     ("jmrShift")), 
   newJECPayloadNames_       (iConfig.getParameter<std::vector<std::string>>("newJECPayloadNames")),
   jecUncPayloadName_        (iConfig.getParameter<std::string>             ("jecUncPayloadName")),
   jecAK8GroomedPayloadNames_(iConfig.getParameter<std::vector<std::string>>("jecAK8GroomedPayloadNames")), 
@@ -189,6 +190,8 @@ void JetMaker::operator()(edm::Event& evt, vlq::JetCollection& jets) {
 
   const int npv(*h_npv) ; 
   const double rho(*h_rho) ; 
+  TRandom3* randjer = new TRandom3();
+  TRandom3* randjmr = new TRandom3();
 
   for (unsigned ijet = 0; ijet < (h_jetPt.product())->size(); ++ijet) { 
 
@@ -240,9 +243,8 @@ void JetMaker::operator()(edm::Event& evt, vlq::JetCollection& jets) {
       double jerscalep4 = ApplyJERp4(eta_reco, jerShift_) ; 
       if (pt_gen > 0.) ptsmear = std::max( 0.0, pt_gen + jerscalep4*(pt_reco - pt_gen) )/pt_reco ; 
       else if (jerscalep4 > 1. && pt_reco > 0.) {
-        TRandom* rand = new TRandom();
-        ptsmear = rand->Gaus(pt_reco, sqrt(jerscalep4*jerscalep4 - 1)*0.2)/pt_reco ; //// Assuming 20% JER
-        delete rand; 
+        ptsmear = randjer->Gaus(pt_reco, sqrt(jerscalep4*jerscalep4 - 1)*0.2)/pt_reco ; //// Assuming 20% JER
+        std::cout << "ptsmear test: " << ptsmear << std::endl;
       }
       else ptsmear = 1.;
       newJetP4 *= ptsmear ; 
@@ -367,12 +369,12 @@ void JetMaker::operator()(edm::Event& evt, vlq::JetCollection& jets) {
       }
 
       double masssmear(1.) ;
-      if ( jerShift_ != 0 ) {
-        double pt_gen = (h_jetGenJetPt.product())->at(ijet) ;  
-        double pt_reco   = uncorrJetP4.Pt() ;
-        double jerscalemass = ApplyJERMass(jerShift_) ; 
-        masssmear = std::max( 0.0, pt_gen + jerscalemass*(pt_reco - pt_gen) )/pt_reco ; 
-      }
+      if ( jmrShift_ != 0 ) {
+        double jerscalemass = ApplyJERMass(jmrShift_) ; 
+        // A 10% W jet mass resolution: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetWtagging#Recommendation_for_13_TeV_data_a
+        masssmear = 1 + randjmr->Gaus(0., 0.1)*sqrt(std::max(jerscalemass*jerscalemass - 1, 0.)) ;
+        std::cout << "smear test: " << masssmear << std::endl;
+        }
 
       newJetP4.SetVectM(newJetP4.Vect(), newJetP4.Mag()*massCorr*masssmear) ; 
 
@@ -521,7 +523,9 @@ void JetMaker::operator()(edm::Event& evt, vlq::JetCollection& jets) {
             jet.setNConsts      ( (h_jetcMultip.product())->at(ijet) + (h_jetnMultip.product())->at(ijet) ) ; 
             jet.setGroomedMassCorr (masssmear * massCorr * (1 + jecShift_*unc) ) ; 
             jet.setNSubjets (nsubjets) ; 
-            jet.setNSubjetsBTaggedCSVL (nsubjetsbtaggedcsvl) ; 
+            jet.setNSubjetsBTaggedCSVL (nsubjetsbtaggedcsvl) ;
+            if (ijet == 0) jet.setIsleading(true);
+            else if (ijet == 1) jet.setIs2ndleading(true) ;
           }
       else {
         continue ; 
