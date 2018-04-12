@@ -74,16 +74,13 @@ class VLQAna : public edm::EDFilter {
     edm::EDGetTokenT<int>            t_evtno      ;
     edm::EDGetTokenT<bool>           t_isData     ;
     edm::EDGetTokenT<bool>           t_hltdecision;
+    edm::EDGetTokenT<bool>           t_hltdecisionBG;
+    edm::EDGetTokenT<bool>           t_hltdecisionH;
     edm::EDGetTokenT<string>         t_evttype    ;
     edm::EDGetTokenT<double>         t_evtwtGen   ;
-    edm::EDGetTokenT<double>         t_evtwtPVBG    ;
-    edm::EDGetTokenT<double>         t_evtwtPVH    ;
     edm::EDGetTokenT<double>         t_evtwtPV    ;
     edm::EDGetTokenT<double>         t_evtwtPVLow ;
     edm::EDGetTokenT<double>         t_evtwtPVHigh;
-    edm::EDGetTokenT<double>         t_evtwtPVAlt    ;
-    edm::EDGetTokenT<double>         t_evtwtPVAltLow ;
-    edm::EDGetTokenT<double>         t_evtwtPVAltHigh;
     edm::EDGetTokenT<unsigned>       t_npv        ;
     edm::EDGetTokenT<int>            t_npuTrue    ;
     edm::EDGetTokenT<double>         t_htHat      ;
@@ -139,16 +136,13 @@ VLQAna::VLQAna(const edm::ParameterSet& iConfig) :
   t_evtno                 (consumes<int>            (iConfig.getParameter<edm::InputTag>("evtno"))),   
   t_isData                (consumes<bool>           (iConfig.getParameter<edm::InputTag>("isData"))),
   t_hltdecision           (consumes<bool>           (iConfig.getParameter<edm::InputTag>("hltdecision"))),
+  t_hltdecisionBG           (consumes<bool>           (iConfig.getParameter<edm::InputTag>("hltdecisionBG"))),
+  t_hltdecisionH           (consumes<bool>           (iConfig.getParameter<edm::InputTag>("hltdecisionH"))),
   t_evttype               (consumes<string>         (iConfig.getParameter<edm::InputTag>("evttype"))),
   t_evtwtGen              (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtGen"))),
-  t_evtwtPVBG               (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVBG"))),
-  t_evtwtPVH               (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVH"))),
   t_evtwtPV               (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPV"))),
   t_evtwtPVLow            (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVLow"))),
   t_evtwtPVHigh           (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVHigh"))),
-  t_evtwtPVAlt               (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVAlt"))),
-  t_evtwtPVAltLow            (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVAltLow"))),
-  t_evtwtPVAltHigh           (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVAltHigh"))),
   t_npv                   (consumes<unsigned>       (iConfig.getParameter<edm::InputTag>("npv"))),
   t_npuTrue               (consumes<int>            (iConfig.getParameter<edm::InputTag>("npuTrue"))),
   t_htHat                 (consumes<double>         (iConfig.getParameter<edm::InputTag>("htHat"))),
@@ -194,16 +188,13 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   Handle<int>            h_evtno         ; evt.getByToken(t_evtno      , h_evtno      ) ; 
   Handle<bool>           h_isData        ; evt.getByToken(t_isData     , h_isData     ) ; 
   Handle<bool>           h_hltdecision   ; evt.getByToken(t_hltdecision, h_hltdecision) ; 
+  Handle<bool>           h_hltdecisionBG   ; evt.getByToken(t_hltdecisionBG, h_hltdecisionBG) ; 
+  Handle<bool>           h_hltdecisionH   ; evt.getByToken(t_hltdecisionH, h_hltdecisionH) ; 
   Handle<string>         h_evttype       ; evt.getByToken(t_evttype    , h_evttype    ) ; 
   Handle<double>         h_evtwtGen      ; evt.getByToken(t_evtwtGen   , h_evtwtGen   ) ; 
-  Handle<double>         h_evtwtPVBG     ; evt.getByToken(t_evtwtPVBG    , h_evtwtPVBG    ) ; 
-  Handle<double>         h_evtwtPVH      ; evt.getByToken(t_evtwtPVH    , h_evtwtPVH    ) ; 
   Handle<double>         h_evtwtPV       ; evt.getByToken(t_evtwtPV    , h_evtwtPV    ) ; 
   Handle<double>         h_evtwtPVLow    ; evt.getByToken(t_evtwtPVLow , h_evtwtPVLow ) ; 
   Handle<double>         h_evtwtPVHigh   ; evt.getByToken(t_evtwtPVHigh, h_evtwtPVHigh) ; 
-  Handle<double>         h_evtwtPVAlt       ; evt.getByToken(t_evtwtPVAlt    , h_evtwtPVAlt    ) ; 
-  Handle<double>         h_evtwtPVAltLow    ; evt.getByToken(t_evtwtPVAltLow , h_evtwtPVAltLow ) ; 
-  Handle<double>         h_evtwtPVAltHigh   ; evt.getByToken(t_evtwtPVAltHigh, h_evtwtPVAltHigh) ; 
   Handle<unsigned>       h_npv           ; evt.getByToken(t_npv        , h_npv        ) ; 
   Handle<int>            h_npuTrue       ; evt.getByToken(t_npuTrue    , h_npuTrue    ) ; 
   Handle<double>         h_htHat         ; evt.getByToken(t_htHat      , h_htHat      ) ; 
@@ -217,13 +208,15 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   const int evtno(*h_evtno.product()) ; 
   const bool isData(*h_isData.product()) ; 
   const bool hltdecision(*h_hltdecision.product()) ; 
+  const bool hltdecisionBG(*h_hltdecisionBG.product()) ; 
+  const bool hltdecisionH(*h_hltdecisionH.product()) ; 
   double evtwt((*h_evtwtGen.product()) * (*h_evtwtPV.product())) ; 
   int npv(*h_npv.product()) ; 
   const double htHat((*h_htHat.product())) ; 
   h1_["cutflow"] -> Fill(1, evtwt) ; 
 
   //if ( isData && !hltdecision ) return false; 
-  if ( !hltdecision ) return false; 
+  //if ( !hltdecision ) return false; 
 
   h1_["cutflow"] -> Fill(2, evtwt) ; 
 
@@ -855,15 +848,13 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   selectedevt_.runno_ = int(runno);
   selectedevt_.lumisec_ = int(lumisec);
   selectedevt_.evtno_ = int(evtno);
+  selectedevt_.hltdecision_ = int(hltdecision);
+  selectedevt_.hltdecisionBG_ = int(hltdecisionBG);
+  selectedevt_.hltdecisionH_ = int(hltdecisionH);
   selectedevt_.EvtWeight_ = double(*h_evtwtGen.product());
-  selectedevt_.EvtWtPVBG_ = double(*h_evtwtPVBG.product()) ; 
-  selectedevt_.EvtWtPVH_ = double(*h_evtwtPVH.product()) ; 
   selectedevt_.EvtWtPV_ = double(*h_evtwtPV.product()) ; 
   selectedevt_.EvtWtPVLow_ = double(*h_evtwtPVLow.product()) ; 
   selectedevt_.EvtWtPVHigh_ = double(*h_evtwtPVHigh.product()) ; 
-  selectedevt_.EvtWtPVAlt_ = double(*h_evtwtPVAlt.product()) ; 
-  selectedevt_.EvtWtPVAltLow_ = double(*h_evtwtPVAltLow.product()) ; 
-  selectedevt_.EvtWtPVAltHigh_ = double(*h_evtwtPVAltHigh.product()) ; 
   selectedevt_.EvtWtHT_ = evtwtHT;
   selectedevt_.EvtWtHTUp_ = evtwtHTUp;
   selectedevt_.EvtWtHTDown_ = evtwtHTDown;
@@ -1448,7 +1439,7 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   }
 
   //// Apply 2D isolation
-  CandidateCleaner cleanleptons(0.4,40); //// The second argument is for lepton 2D iso, setting to -1 disables it
+  CandidateCleaner cleanleptons(0.4,25); //// The second argument is for lepton 2D iso, setting to -1 disables it
 
   cleanleptons(goodElectrons,goodAK4Jets) ;
   cleanleptons(goodMuons,goodAK4Jets) ;

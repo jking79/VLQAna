@@ -7,11 +7,11 @@ cd CMSSW_8_0_20/src
 
 git cms-init 
 
-git cms-merge-topic dmajumder:CMSSW_8_0_X_AnalysisDataFormats_BoostedObjects
+git cms-merge-topic EJDomi:CMSSW_8_0_X_AnalysisDataFormats_BoostedObjects
 
 git clone git@github.com:dmajumder/EventCounter.git Analysis/EventCounter
 
-git clone -b CMSSW_8_0_X_NewB2GAnaFW git@github.com:dmajumder/VLQAna.git Analysis/VLQAna
+git clone -b CMSSW_8_0_X_NewB2GAnaFW git@github.com:EJDomi/VLQAna.git Analysis/VLQAna
 ```
 #To just build this stuff
 ```
