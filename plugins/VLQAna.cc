@@ -861,11 +861,6 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   selectedevt_.hltdecisionBG_ = int(hltdecisionBG);
   selectedevt_.hltdecisionH_ = int(hltdecisionH);
   selectedevt_.EvtWeight_ = double(*h_evtwtGen.product());
-<<<<<<< HEAD
-=======
-  selectedevt_.EvtWtPVBG_ = double(*h_evtwtPVBG.product()) ; 
-  selectedevt_.EvtWtPVH_ = double(*h_evtwtPVH.product()) ; 
->>>>>>> cbcf35d7eaddb1806abee1aa946a40af928451a9
   selectedevt_.EvtWtPV_ = double(*h_evtwtPV.product()) ; 
   selectedevt_.EvtWtPVLow_ = double(*h_evtwtPVLow.product()) ; 
   selectedevt_.EvtWtPVHigh_ = double(*h_evtwtPVHigh.product()) ; 
