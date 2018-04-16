@@ -90,7 +90,7 @@ options.register('storeTrigBits', False,
     VarParsing.varType.bool,
     "Store trigger bits and names?"
     )
-options.register('FileNames', 'TbtH_1200_LH',
+options.register('FileNames', 'TpbtH_M1000_W10p',
     VarParsing.multiplicity.singleton,
     VarParsing.varType.string,
     "Name of list of input files"
@@ -112,7 +112,6 @@ hltpathsOrBG = [
 #Run2016H
 hltpathsOrH = ["HLT_AK8PFJet360_TrimMass30_v", 
               "HLT_AK8DiPFJet300_200_TrimMass30_v",
-              "HLT_AK8DiPFJet280_200_TrimMass30_v",
               "HLT_AK8PFHT700_TrimR0p1PT0p03Mass50_v",
               "HLT_AK8PFJet450_v",
               "HLT_PFHT900_v",
@@ -173,13 +172,12 @@ process.evtcleaner.File_PUDistMC        = cms.string(os.path.join(dataFilePath,'
 process.evtcleanerBG = process.evtcleaner.clone()
 process.evtcleanerBG.hltORAND = cms.string (options.hltORAND)  
 process.evtcleanerBG.hltPaths = cms.vstring (hltpathsOrBG)  
-process.evtcleanerBG.File_PUDistData = cms.string(os.path.join(dataFilePath, 'RunII2016Rereco_25ns_RunsBtoG_PUXsec69000nb.root'))
 process.evtcleanerBG.storeLHEWts = cms.bool(False)
 process.evtcleanerBG.storeTrigBits = cms.bool(False)
+
 process.evtcleanerH = process.evtcleaner.clone()
 process.evtcleanerH.hltORAND = cms.string (options.hltORAND)  
 process.evtcleanerH.hltPaths = cms.vstring (hltpathsOrH)  
-process.evtcleanerH.File_PUDistData = cms.string(os.path.join(dataFilePath,'RunII2016Rereco_25ns_RunH_PUXsec69000nb.root'))
 process.evtcleanerH.storeLHEWts = cms.bool(False)
 process.evtcleanerH.storeTrigBits = cms.bool(False)
 
@@ -284,6 +282,8 @@ if options.isData:
     process.anaJERDown = process.ana.clone()
     process.anaJESUp = process.ana.clone()
     process.anaJESDown = process.ana.clone()
+    process.anaJMRUp = process.ana.clone()
+    process.anaJMRDown = process.ana.clone()
     process.evtcleanerJERUp = process.evtcleaner.clone()
     process.evtcleanerJERUp.storeLHEWts = False
     process.evtcleanerJERUp.storeTrigBits = False
@@ -296,32 +296,38 @@ if options.isData:
     process.evtcleanerJESDown = process.evtcleaner.clone()
     process.evtcleanerJESDown.storeLHEWts = False
     process.evtcleanerJESDown.storeTrigBits = False
+    process.evtcleanerJMRUp = process.evtcleaner.clone()
+    process.evtcleanerJMRUp.storeLHEWts = False
+    process.evtcleanerJMRUp.storeTrigBits = False
+    process.evtcleanerJMRDown = process.evtcleaner.clone()
+    process.evtcleanerJMRDown.storeLHEWts = False
+    process.evtcleanerJMRDown.storeTrigBits = False
 else:    
     process.anaJERUp = process.ana.clone()
     process.anaJERUp.jetAK4selParams.jecShift = cms.double(0) 
     process.anaJERUp.jetAK4selParams.jerShift = cms.int32(2) 
-    process.anaJERUp.jetAK4selParams.jmrShift = cms.int32(2) 
+    process.anaJERUp.jetAK4selParams.jmrShift = cms.int32(1) 
     process.anaJERUp.jetAK8selParams.jecShift = cms.double(0) 
     process.anaJERUp.jetAK8selParams.jerShift = cms.int32(2) 
-    process.anaJERUp.jetAK8selParams.jmrShift = cms.int32(2) 
+    process.anaJERUp.jetAK8selParams.jmrShift = cms.int32(1) 
     process.anaJERUp.jetHTaggedselParams.jecShift = cms.double(0) 
     process.anaJERUp.jetHTaggedselParams.jerShift = cms.int32(2) 
-    process.anaJERUp.jetHTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJERUp.jetHTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERUp.jetTopTaggedselParams.jecShift = cms.double(0) 
     process.anaJERUp.jetTopTaggedselParams.jerShift = cms.int32(2) 
-    process.anaJERUp.jetTopTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJERUp.jetTopTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERUp.jetAntiHTaggedselParams.jecShift = cms.double(0) 
     process.anaJERUp.jetAntiHTaggedselParams.jerShift = cms.int32(2) 
-    process.anaJERUp.jetAntiHTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJERUp.jetAntiHTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERUp.jetAntiTopTaggedselParams.jecShift = cms.double(0) 
     process.anaJERUp.jetAntiTopTaggedselParams.jerShift = cms.int32(2) 
-    process.anaJERUp.jetAntiTopTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJERUp.jetAntiTopTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERUp.jetZTaggedselParams.jecShift = cms.double(0) 
     process.anaJERUp.jetZTaggedselParams.jerShift = cms.int32(2) 
-    process.anaJERUp.jetZTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJERUp.jetZTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERUp.jetAntiZTaggedselParams.jecShift = cms.double(0) 
     process.anaJERUp.jetAntiZTaggedselParams.jerShift = cms.int32(2) 
-    process.anaJERUp.jetAntiZTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJERUp.jetAntiZTaggedselParams.jmrShift = cms.int32(1) 
     
     process.evtcleanerJERUp = process.evtcleaner.clone()
     process.evtcleanerJERUp.storeLHEWts = False
@@ -331,28 +337,28 @@ else:
     process.anaJERDown = process.ana.clone()
     process.anaJERDown.jetAK4selParams.jecShift = cms.double(0) 
     process.anaJERDown.jetAK4selParams.jerShift = cms.int32(-1) 
-    process.anaJERDown.jetAK4selParams.jmrShift = cms.int32(-1) 
+    process.anaJERDown.jetAK4selParams.jmrShift = cms.int32(1) 
     process.anaJERDown.jetAK8selParams.jecShift = cms.double(0) 
     process.anaJERDown.jetAK8selParams.jerShift = cms.int32(-1) 
-    process.anaJERDown.jetAK8selParams.jmrShift = cms.int32(-1) 
+    process.anaJERDown.jetAK8selParams.jmrShift = cms.int32(1) 
     process.anaJERDown.jetHTaggedselParams.jecShift = cms.double(0) 
     process.anaJERDown.jetHTaggedselParams.jerShift = cms.int32(-1) 
-    process.anaJERDown.jetHTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJERDown.jetHTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERDown.jetTopTaggedselParams.jecShift = cms.double(0) 
     process.anaJERDown.jetTopTaggedselParams.jerShift = cms.int32(-1) 
-    process.anaJERDown.jetTopTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJERDown.jetTopTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERDown.jetAntiHTaggedselParams.jecShift = cms.double(0) 
     process.anaJERDown.jetAntiHTaggedselParams.jerShift = cms.int32(-1) 
-    process.anaJERDown.jetAntiHTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJERDown.jetAntiHTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERDown.jetAntiTopTaggedselParams.jecShift = cms.double(0) 
     process.anaJERDown.jetAntiTopTaggedselParams.jerShift = cms.int32(-1) 
-    process.anaJERDown.jetAntiTopTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJERDown.jetAntiTopTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERDown.jetZTaggedselParams.jecShift = cms.double(0) 
     process.anaJERDown.jetZTaggedselParams.jerShift = cms.int32(-1) 
-    process.anaJERDown.jetZTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJERDown.jetZTaggedselParams.jmrShift = cms.int32(1) 
     process.anaJERDown.jetAntiZTaggedselParams.jecShift = cms.double(0) 
     process.anaJERDown.jetAntiZTaggedselParams.jerShift = cms.int32(-1)
-    process.anaJERDown.jetAntiZTaggedselParams.jmrShift = cms.int32(-1)
+    process.anaJERDown.jetAntiZTaggedselParams.jmrShift = cms.int32(1)
     
     process.evtcleanerJERDown = process.evtcleaner.clone()
     process.evtcleanerJERDown.storeLHEWts = False
@@ -418,6 +424,67 @@ else:
     process.evtcleanerJESDown.storeLHEWts = False
     process.evtcleanerJESDown.storeTrigBits = False
 
+    process.anaJMRUp = process.ana.clone()
+    process.anaJMRUp.jetAK4selParams.jecShift = cms.double(0) 
+    process.anaJMRUp.jetAK4selParams.jerShift = cms.int32(1) 
+    process.anaJMRUp.jetAK4selParams.jmrShift = cms.int32(2) 
+    process.anaJMRUp.jetAK8selParams.jecShift = cms.double(0) 
+    process.anaJMRUp.jetAK8selParams.jerShift = cms.int32(1) 
+    process.anaJMRUp.jetAK8selParams.jmrShift = cms.int32(2) 
+    process.anaJMRUp.jetHTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRUp.jetHTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRUp.jetHTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJMRUp.jetTopTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRUp.jetTopTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRUp.jetTopTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJMRUp.jetAntiHTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRUp.jetAntiHTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRUp.jetAntiHTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJMRUp.jetAntiTopTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRUp.jetAntiTopTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRUp.jetAntiTopTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJMRUp.jetZTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRUp.jetZTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRUp.jetZTaggedselParams.jmrShift = cms.int32(2) 
+    process.anaJMRUp.jetAntiZTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRUp.jetAntiZTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRUp.jetAntiZTaggedselParams.jmrShift = cms.int32(2) 
+    
+    process.evtcleanerJMRUp = process.evtcleaner.clone()
+    process.evtcleanerJMRUp.storeLHEWts = False
+    process.evtcleanerJMRUp.storeTrigBits = False
+    
+     
+    process.anaJMRDown = process.ana.clone()
+    process.anaJMRDown.jetAK4selParams.jecShift = cms.double(0) 
+    process.anaJMRDown.jetAK4selParams.jerShift = cms.int32(1) 
+    process.anaJMRDown.jetAK4selParams.jmrShift = cms.int32(-1) 
+    process.anaJMRDown.jetAK8selParams.jecShift = cms.double(0) 
+    process.anaJMRDown.jetAK8selParams.jerShift = cms.int32(1) 
+    process.anaJMRDown.jetAK8selParams.jmrShift = cms.int32(-1) 
+    process.anaJMRDown.jetHTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRDown.jetHTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRDown.jetHTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJMRDown.jetTopTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRDown.jetTopTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRDown.jetTopTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJMRDown.jetAntiHTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRDown.jetAntiHTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRDown.jetAntiHTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJMRDown.jetAntiTopTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRDown.jetAntiTopTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRDown.jetAntiTopTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJMRDown.jetZTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRDown.jetZTaggedselParams.jerShift = cms.int32(1) 
+    process.anaJMRDown.jetZTaggedselParams.jmrShift = cms.int32(-1) 
+    process.anaJMRDown.jetAntiZTaggedselParams.jecShift = cms.double(0) 
+    process.anaJMRDown.jetAntiZTaggedselParams.jerShift = cms.int32(1)
+    process.anaJMRDown.jetAntiZTaggedselParams.jmrShift = cms.int32(-1)
+    
+    process.evtcleanerJMRDown = process.evtcleaner.clone()
+    process.evtcleanerJMRDown.storeLHEWts = False
+    process.evtcleanerJMRDown.storeTrigBits = False
+
 from Analysis.EventCounter.eventcounter_cfi import eventCounter
 process.allEvents = eventCounter.clone(isData=options.isData)
 process.cleanedEvents = eventCounter.clone(isData=options.isData)
@@ -425,6 +492,8 @@ process.cleanedEventsJERUp = eventCounter.clone(isData=options.isData)
 process.cleanedEventsJERDown = eventCounter.clone(isData=options.isData)
 process.cleanedEventsJESUp = eventCounter.clone(isData=options.isData)
 process.cleanedEventsJESDown = eventCounter.clone(isData=options.isData)
+process.cleanedEventsJMRUp = eventCounter.clone(isData=options.isData)
+process.cleanedEventsJMRDown = eventCounter.clone(isData=options.isData)
 process.finalEvents = eventCounter.clone(isData=options.isData)
 process.finalEvents0p3 = eventCounter.clone(isData=options.isData)
 process.finalEvents0p3Med = eventCounter.clone(isData=options.isData)
@@ -432,13 +501,14 @@ process.finalEventsJERUp = eventCounter.clone(isData=options.isData)
 process.finalEventsJERDown = eventCounter.clone(isData=options.isData)
 process.finalEventsJESUp = eventCounter.clone(isData=options.isData)
 process.finalEventsJESDown = eventCounter.clone(isData=options.isData)
+process.finalEventsJMRUp = eventCounter.clone(isData=options.isData)
+process.finalEventsJMRDown = eventCounter.clone(isData=options.isData)
 
 process.p = cms.Path(
     process.allEvents
     *process.evtcleaner
     *process.evtcleanerBG
     *process.evtcleanerH
-    *process.evtcleanerAlt
     *process.cleanedEvents
     *process.anaCHS 
     *process.finalEvents
@@ -453,7 +523,6 @@ process.pJERUp = cms.Path(
     *process.anaJERUp 
     *process.finalEventsJERUp
     )
-<<<<<<< HEAD
 process.pJERDown = cms.Path(
     process.allEvents
     *process.evtcleanerJERDown
@@ -481,11 +550,29 @@ process.pJESDown = cms.Path(
     *process.anaJESDown
     *process.finalEventsJESDown
     )
+process.pJMRUp = cms.Path(
+    process.allEvents
+    *process.evtcleanerJMRUp
+    *process.evtcleanerBG
+    *process.evtcleanerH
+    *process.cleanedEventsJMRUp
+    *process.anaJMRUp 
+    *process.finalEventsJMRUp
+    )
+process.pJMRDown = cms.Path(
+    process.allEvents
+    *process.evtcleanerJMRDown
+    *process.evtcleanerBG
+    *process.evtcleanerH
+    *process.cleanedEventsJMRDown
+    *process.anaJMRDown
+    *process.finalEventsJMRDown
+    )
 #process.out = cms.OutputModule("PoolOutputModule",
 #        SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('evtcleaner')),
 #            )
 
-process.schedule = cms.Schedule(process.p, process.pJERUp, process.pJERDown, process.pJESUp, process.pJESDown)
+process.schedule = cms.Schedule(process.p)#, process.pJERUp, process.pJERDown, process.pJESUp, process.pJESDown)#,process.pJMRUp, process.pJMRDown )
 
 #process.outpath = cms.EndPath(process.out)
 

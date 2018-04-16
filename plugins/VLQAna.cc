@@ -81,9 +81,6 @@ class VLQAna : public edm::EDFilter {
     edm::EDGetTokenT<double>         t_evtwtPV    ;
     edm::EDGetTokenT<double>         t_evtwtPVLow ;
     edm::EDGetTokenT<double>         t_evtwtPVHigh;
-    edm::EDGetTokenT<double>         t_evtwtPVAlt    ;
-    edm::EDGetTokenT<double>         t_evtwtPVAltLow ;
-    edm::EDGetTokenT<double>         t_evtwtPVAltHigh;
     edm::EDGetTokenT<unsigned>       t_npv        ;
     edm::EDGetTokenT<int>            t_npuTrue    ;
     edm::EDGetTokenT<double>         t_htHat      ;
@@ -92,8 +89,11 @@ class VLQAna : public edm::EDFilter {
     edm::EDGetTokenT<vector<double>> t_trigBit     ;
     edm::EDGetTokenT<vector<string>> t_trigName     ;
 
-    ElectronMaker electronmaker                   ; 
-    MuonMaker muonmaker                           ; 
+    ElectronMaker tightelectronmaker                   ; 
+    ElectronMaker mvawp80electronmaker                   ; 
+    MuonMaker mediummuonmaker                           ; 
+    MuonMaker tightmuonmaker                           ; 
+    MuonMaker highPtmuonmaker                           ; 
 
     JetMaker jetAK4maker                          ; 
     JetMaker jetAK8maker                          ; 
@@ -146,9 +146,6 @@ VLQAna::VLQAna(const edm::ParameterSet& iConfig) :
   t_evtwtPV               (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPV"))),
   t_evtwtPVLow            (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVLow"))),
   t_evtwtPVHigh           (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVHigh"))),
-  t_evtwtPVAlt               (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVAlt"))),
-  t_evtwtPVAltLow            (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVAltLow"))),
-  t_evtwtPVAltHigh           (consumes<double>         (iConfig.getParameter<edm::InputTag>("evtwtPVAltHigh"))),
   t_npv                   (consumes<unsigned>       (iConfig.getParameter<edm::InputTag>("npv"))),
   t_npuTrue               (consumes<int>            (iConfig.getParameter<edm::InputTag>("npuTrue"))),
   t_htHat                 (consumes<double>         (iConfig.getParameter<edm::InputTag>("htHat"))),
@@ -156,8 +153,11 @@ VLQAna::VLQAna(const edm::ParameterSet& iConfig) :
   t_lhewts                (consumes<vector<double>> (iConfig.getParameter<edm::InputTag>("lhewts"))),
   t_trigBit                (consumes<vector<double>> (iConfig.getParameter<edm::InputTag>("trigBit"))),
   t_trigName                (consumes<vector<string>> (iConfig.getParameter<edm::InputTag>("trigName"))),
-  electronmaker           (iConfig.getParameter<edm::ParameterSet>("elselParams"),consumesCollector()),
-  muonmaker               (iConfig.getParameter<edm::ParameterSet>("muselParams"),consumesCollector()),
+  tightelectronmaker           (iConfig.getParameter<edm::ParameterSet>("elselTightParams"),consumesCollector()),
+  mvawp80electronmaker           (iConfig.getParameter<edm::ParameterSet>("elselMvaWP80Params"),consumesCollector()),
+  mediummuonmaker               (iConfig.getParameter<edm::ParameterSet>("muselMediumParams"),consumesCollector()),
+  tightmuonmaker               (iConfig.getParameter<edm::ParameterSet>("muselTightParams"),consumesCollector()),
+  highPtmuonmaker               (iConfig.getParameter<edm::ParameterSet>("muselHighPtParams"),consumesCollector()),
   jetAK4maker             (iConfig.getParameter<edm::ParameterSet>("jetAK4selParams"), consumesCollector()), 
   jetAK8maker             (iConfig.getParameter<edm::ParameterSet>("jetAK8selParams"), consumesCollector()), 
   jetHTaggedmaker         (iConfig.getParameter<edm::ParameterSet>("jetHTaggedselParams"), consumesCollector()), 
@@ -201,9 +201,6 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   Handle<double>         h_evtwtPV       ; evt.getByToken(t_evtwtPV    , h_evtwtPV    ) ; 
   Handle<double>         h_evtwtPVLow    ; evt.getByToken(t_evtwtPVLow , h_evtwtPVLow ) ; 
   Handle<double>         h_evtwtPVHigh   ; evt.getByToken(t_evtwtPVHigh, h_evtwtPVHigh) ; 
-  Handle<double>         h_evtwtPVAlt       ; evt.getByToken(t_evtwtPVAlt    , h_evtwtPVAlt    ) ; 
-  Handle<double>         h_evtwtPVAltLow    ; evt.getByToken(t_evtwtPVAltLow , h_evtwtPVAltLow ) ; 
-  Handle<double>         h_evtwtPVAltHigh   ; evt.getByToken(t_evtwtPVAltHigh, h_evtwtPVAltHigh) ; 
   Handle<unsigned>       h_npv           ; evt.getByToken(t_npv        , h_npv        ) ; 
   Handle<int>            h_npuTrue       ; evt.getByToken(t_npuTrue    , h_npuTrue    ) ; 
   Handle<double>         h_htHat         ; evt.getByToken(t_htHat      , h_htHat      ) ; 
@@ -864,9 +861,6 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   selectedevt_.EvtWtPV_ = double(*h_evtwtPV.product()) ; 
   selectedevt_.EvtWtPVLow_ = double(*h_evtwtPVLow.product()) ; 
   selectedevt_.EvtWtPVHigh_ = double(*h_evtwtPVHigh.product()) ; 
-  selectedevt_.EvtWtPVAlt_ = double(*h_evtwtPVAlt.product()) ; 
-  selectedevt_.EvtWtPVAltLow_ = double(*h_evtwtPVAltLow.product()) ; 
-  selectedevt_.EvtWtPVAltHigh_ = double(*h_evtwtPVAltHigh.product()) ; 
   selectedevt_.EvtWtHT_ = evtwtHT;
   selectedevt_.EvtWtHTUp_ = evtwtHTUp;
   selectedevt_.EvtWtHTDown_ = evtwtHTDown;
@@ -1372,38 +1366,41 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   }
 
   //// Lepton veto 
-  vlq::ElectronCollection goodElectrons; 
-  electronmaker(evt, goodElectrons) ;
+  vlq::ElectronCollection goodTightElectrons, goodMVAElectrons; 
+  tightelectronmaker(evt, goodTightElectrons) ;
+  mvawp80electronmaker(evt, goodMVAElectrons) ;
 
-  vlq::MuonCollection goodMuons; 
-  muonmaker(evt, goodMuons) ; 
+  vlq::MuonCollection goodMediumMuons, goodTightMuons, goodHighPtMuons; 
+  mediummuonmaker(evt, goodMediumMuons) ; 
+  tightmuonmaker(evt, goodTightMuons) ; 
+  highPtmuonmaker(evt, goodHighPtMuons) ; 
 
-  selectedevt_.nEl_ = int(goodElectrons.size());
-  selectedevt_.nMu_ = int(goodMuons.size());
+  selectedevt_.nEl_ = int(goodMVAElectrons.size());
+  selectedevt_.nMu_ = int(goodMediumMuons.size());
 
-  leptons_.idxEl             .clear() ; leptons_.idxEl             .reserve(goodElectrons.size()) ;   
-  leptons_.ptEl              .clear() ; leptons_.ptEl              .reserve(goodElectrons.size()) ; 
-  leptons_.etaEl             .clear() ; leptons_.etaEl             .reserve(goodElectrons.size()) ;   
-  leptons_.phiEl             .clear() ; leptons_.phiEl             .reserve(goodElectrons.size()) ;   
-  leptons_.EEl               .clear() ; leptons_.EEl               .reserve(goodElectrons.size()) ;  
-  leptons_.IsoDREl               .clear() ; leptons_.IsoDREl               .reserve(goodElectrons.size()) ;  
-  leptons_.dR_Iso2DEl               .clear() ; leptons_.dR_Iso2DEl               .reserve(goodElectrons.size()) ;  
-  leptons_.ptrel_Iso2DEl               .clear() ; leptons_.ptrel_Iso2DEl               .reserve(goodElectrons.size()) ;  
-  leptons_.idxMu             .clear() ; leptons_.idxMu             .reserve(goodMuons.size()) ;   
-  leptons_.ptMu              .clear() ; leptons_.ptMu              .reserve(goodMuons.size()) ; 
-  leptons_.etaMu             .clear() ; leptons_.etaMu             .reserve(goodMuons.size()) ;   
-  leptons_.phiMu             .clear() ; leptons_.phiMu             .reserve(goodMuons.size()) ;   
-  leptons_.EMu               .clear() ; leptons_.EMu               .reserve(goodMuons.size()) ;  
-  leptons_.IsoDRMu               .clear() ; leptons_.IsoDRMu               .reserve(goodMuons.size()) ;  
-  leptons_.dR_Iso2DMu               .clear() ; leptons_.dR_Iso2DMu               .reserve(goodMuons.size()) ;  
-  leptons_.ptrel_Iso2DMu               .clear() ; leptons_.ptrel_Iso2DMu               .reserve(goodMuons.size()) ;  
+  leptons_.idxEl             .clear() ; leptons_.idxEl             .reserve(goodMVAElectrons.size()) ;   
+  leptons_.ptEl              .clear() ; leptons_.ptEl              .reserve(goodMVAElectrons.size()) ; 
+  leptons_.etaEl             .clear() ; leptons_.etaEl             .reserve(goodMVAElectrons.size()) ;   
+  leptons_.phiEl             .clear() ; leptons_.phiEl             .reserve(goodMVAElectrons.size()) ;   
+  leptons_.EEl               .clear() ; leptons_.EEl               .reserve(goodMVAElectrons.size()) ;  
+  leptons_.IsoDREl               .clear() ; leptons_.IsoDREl               .reserve(goodMVAElectrons.size()) ;  
+  leptons_.dR_Iso2DEl               .clear() ; leptons_.dR_Iso2DEl               .reserve(goodMVAElectrons.size()) ;  
+  leptons_.ptrel_Iso2DEl               .clear() ; leptons_.ptrel_Iso2DEl               .reserve(goodMVAElectrons.size()) ;  
+  leptons_.idxMu             .clear() ; leptons_.idxMu             .reserve(goodTightMuons.size()) ;   
+  leptons_.ptMu              .clear() ; leptons_.ptMu              .reserve(goodTightMuons.size()) ; 
+  leptons_.etaMu             .clear() ; leptons_.etaMu             .reserve(goodTightMuons.size()) ;   
+  leptons_.phiMu             .clear() ; leptons_.phiMu             .reserve(goodTightMuons.size()) ;   
+  leptons_.EMu               .clear() ; leptons_.EMu               .reserve(goodTightMuons.size()) ;  
+  leptons_.IsoDRMu               .clear() ; leptons_.IsoDRMu               .reserve(goodTightMuons.size()) ;  
+  leptons_.dR_Iso2DMu               .clear() ; leptons_.dR_Iso2DMu               .reserve(goodTightMuons.size()) ;  
+  leptons_.ptrel_Iso2DMu               .clear() ; leptons_.ptrel_Iso2DMu               .reserve(goodTightMuons.size()) ;  
  
-  h1_["nel"]->Fill(goodElectrons.size(),evtwt*toptagsf*btagsf) ;
-  h1_["nmu"]->Fill(goodMuons.size(),evtwt*toptagsf*btagsf) ;
+  h1_["nel"]->Fill(goodMVAElectrons.size(),evtwt*toptagsf*btagsf) ;
+  h1_["nmu"]->Fill(goodMediumMuons.size(),evtwt*toptagsf*btagsf) ;
 
   int nel_passreliso(0), nmu_passreliso(0);
 
-  for (vlq::Electron el : goodElectrons ) {
+  for (vlq::Electron el : goodMVAElectrons ) {
     h1_["elIsoDR"] ->Fill(el.getIso03(),evtwt*toptagsf*btagsf) ; 
     //// Get 2D isolation
     std::pair<double, double> el_drmin_ptrel(Utilities::drmin_pTrel<vlq::Electron, vlq::Jet>(el, goodAK4Jets)) ;
@@ -1421,7 +1418,7 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
     leptons_.ptrel_Iso2DEl   .push_back(el_drmin_ptrel.second);
   }
 
-  for (vlq::Muon mu : goodMuons ) {
+  for (vlq::Muon mu : goodMediumMuons ) {
     h1_["muIsoDR"] ->Fill(mu.getIso04(),evtwt*toptagsf*btagsf) ; 
     //// Get 2D isolation
     std::pair<double, double> mu_drmin_ptrel(Utilities::drmin_pTrel<vlq::Muon, vlq::Jet>(mu, goodAK4Jets)) ;
@@ -1444,42 +1441,86 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
   h1_["nelAfterRelIso"] -> Fill(nel_passreliso,evtwt*toptagsf*btagsf) ;
   h1_["nmuAfterRelIso"] -> Fill(nmu_passreliso,evtwt*toptagsf*btagsf) ;
 
-  for (vlq::Electron el : goodElectrons) {
+  for (vlq::Electron el : goodTightElectrons) {
   }
 
-  for (vlq::Muon mu : goodMuons) {
+  for (vlq::Muon mu : goodMediumMuons) {
   }
 
   //// Apply 2D isolation
-  CandidateCleaner cleanleptons(0.4,25); //// The second argument is for lepton 2D iso, setting to -1 disables it
+  CandidateCleaner cleanleptons25(0.4,25); //// The second argument is for lepton 2D iso, setting to -1 disables it
+  CandidateCleaner cleanleptons40(0.4,40); //// The second argument is for lepton 2D iso, setting to -1 disables it
 
-  cleanleptons(goodElectrons,goodAK4Jets) ;
-  cleanleptons(goodMuons,goodAK4Jets) ;
+  vlq::MuonCollection ptRel40MediumMuons = goodMediumMuons;
+  vlq::MuonCollection ptRel40TightMuons = goodTightMuons;
+  vlq::MuonCollection ptRel40HighPtMuons = goodHighPtMuons;
+  vlq::ElectronCollection ptRel40TightElectrons = goodTightElectrons;
+  vlq::ElectronCollection ptRel40MVAElectrons = goodMVAElectrons;
 
-  //cleanleptons(goodElectrons,goodAK8Jets) ;
-  //cleanleptons(goodMuons,goodAK8Jets) ;
+  cleanleptons25(goodTightElectrons,goodAK4Jets) ;
+  cleanleptons25(goodMVAElectrons,goodAK4Jets) ;
+  cleanleptons25(goodMediumMuons,goodAK4Jets) ;
+  cleanleptons25(goodTightMuons,goodAK4Jets) ;
+  cleanleptons25(goodHighPtMuons,goodAK4Jets) ;
 
-  selectedevt_.nCleanedEl_ = int(goodElectrons.size());
-  selectedevt_.nCleanedMu_ = int(goodMuons.size());
+  cleanleptons40(ptRel40TightElectrons,goodAK4Jets) ;
+  cleanleptons40(ptRel40MVAElectrons,goodAK4Jets) ;
+  cleanleptons40(ptRel40MediumMuons,goodAK4Jets) ;
+  cleanleptons40(ptRel40TightMuons,goodAK4Jets) ;
+  cleanleptons40(ptRel40HighPtMuons,goodAK4Jets) ;
+  //cleanleptons25(goodTightElectrons,goodAK8Jets) ;
+  //cleanleptons25(goodMVAElectrons,goodAK8Jets) ;
+  //cleanleptons25(goodMediumMuons,goodAK8Jets) ;
+  
+  bool noIsoTightEl(false), noIsoMVAEl(false), noIso40TightEl(false), noIso40MVAEl(false);
+  bool noIsoMediumMu(false), noIsoTightMu(false), noIsoHighPtMu(false), noIso40MediumMu(false), noIso40TightMu(false), noIso40HighPtMu(false);
+  if (int(goodTightElectrons.size()) == 0) noIsoTightEl = true;
+  if (int(goodMVAElectrons.size()) == 0) noIsoMVAEl = true;
+  if (int(ptRel40TightElectrons.size()) == 0) noIso40TightEl = true;
+  if (int(ptRel40MVAElectrons.size()) == 0) noIso40MVAEl = true;
+ 
+  if (int(goodMediumMuons.size()) == 0) noIsoMediumMu = true;
+  if (int(goodTightMuons.size()) == 0) noIsoTightMu = true;
+  if (int(goodHighPtMuons.size()) == 0) noIsoHighPtMu = true;
+  if (int(ptRel40MediumMuons.size()) == 0) noIso40MediumMu = true;
+  if (int(ptRel40TightMuons.size()) == 0) noIso40TightMu = true;
+  if (int(ptRel40HighPtMuons.size()) == 0) noIso40HighPtMu = true;
+   
+  selectedevt_.noIsoMediumMu_ = noIsoMediumMu;
+  selectedevt_.noIsoTightMu_ = noIsoTightMu;
+  selectedevt_.noIsoHighPtMu_ = noIsoHighPtMu;
 
-  leptons_.idxCleanedEl             .clear() ; leptons_.idxCleanedEl             .reserve(goodElectrons.size()) ;   
-  leptons_.ptCleanedEl              .clear() ; leptons_.ptCleanedEl              .reserve(goodElectrons.size()) ; 
-  leptons_.etaCleanedEl             .clear() ; leptons_.etaCleanedEl             .reserve(goodElectrons.size()) ;   
-  leptons_.phiCleanedEl             .clear() ; leptons_.phiCleanedEl             .reserve(goodElectrons.size()) ;   
-  leptons_.ECleanedEl               .clear() ; leptons_.ECleanedEl               .reserve(goodElectrons.size()) ;  
-  leptons_.IsoDRAfterIso2DEl .clear() ; leptons_.IsoDRAfterIso2DEl .reserve(goodElectrons.size()) ;  
-  leptons_.idxCleanedMu             .clear() ; leptons_.idxCleanedMu             .reserve(goodMuons.size()) ;   
-  leptons_.ptCleanedMu              .clear() ; leptons_.ptCleanedMu              .reserve(goodMuons.size()) ; 
-  leptons_.etaCleanedMu             .clear() ; leptons_.etaCleanedMu             .reserve(goodMuons.size()) ;   
-  leptons_.phiCleanedMu             .clear() ; leptons_.phiCleanedMu             .reserve(goodMuons.size()) ;   
-  leptons_.ECleanedMu               .clear() ; leptons_.ECleanedMu               .reserve(goodMuons.size()) ;  
-  leptons_.IsoDRAfterIso2DMu .clear() ; leptons_.IsoDRAfterIso2DMu .reserve(goodMuons.size()) ;  
+  selectedevt_.noIsoTightEl_ = noIsoTightEl;
+  selectedevt_.noIsoMVAEl_ = noIsoMVAEl;
+
+  selectedevt_.noIso40MediumMu_ = noIso40MediumMu;
+  selectedevt_.noIso40TightMu_ = noIso40TightMu;
+  selectedevt_.noIso40HighPtMu_ = noIso40HighPtMu;
+
+  selectedevt_.noIso40TightEl_ = noIso40TightEl;
+  selectedevt_.noIso40MVAEl_ = noIso40MVAEl;
+
+  selectedevt_.nCleanedEl_ = int(goodMVAElectrons.size());
+  selectedevt_.nCleanedMu_ = int(goodTightMuons.size());
+
+  leptons_.idxCleanedEl             .clear() ; leptons_.idxCleanedEl             .reserve(goodMVAElectrons.size()) ;   
+  leptons_.ptCleanedEl              .clear() ; leptons_.ptCleanedEl              .reserve(goodMVAElectrons.size()) ; 
+  leptons_.etaCleanedEl             .clear() ; leptons_.etaCleanedEl             .reserve(goodMVAElectrons.size()) ;   
+  leptons_.phiCleanedEl             .clear() ; leptons_.phiCleanedEl             .reserve(goodMVAElectrons.size()) ;   
+  leptons_.ECleanedEl               .clear() ; leptons_.ECleanedEl               .reserve(goodMVAElectrons.size()) ;  
+  leptons_.IsoDRAfterIso2DEl .clear() ; leptons_.IsoDRAfterIso2DEl .reserve(goodMVAElectrons.size()) ;  
+  leptons_.idxCleanedMu             .clear() ; leptons_.idxCleanedMu             .reserve(goodTightMuons.size()) ;   
+  leptons_.ptCleanedMu              .clear() ; leptons_.ptCleanedMu              .reserve(goodTightMuons.size()) ; 
+  leptons_.etaCleanedMu             .clear() ; leptons_.etaCleanedMu             .reserve(goodTightMuons.size()) ;   
+  leptons_.phiCleanedMu             .clear() ; leptons_.phiCleanedMu             .reserve(goodTightMuons.size()) ;   
+  leptons_.ECleanedMu               .clear() ; leptons_.ECleanedMu               .reserve(goodTightMuons.size()) ;  
+  leptons_.IsoDRAfterIso2DMu .clear() ; leptons_.IsoDRAfterIso2DMu .reserve(goodTightMuons.size()) ;  
 
 
-  h1_["nelAfter2DIso"]->Fill(goodElectrons.size(),evtwt*toptagsf*btagsf) ;
-  h1_["nmuAfter2DIso"]->Fill(goodMuons.size(),evtwt*toptagsf*btagsf) ;
+  h1_["nelAfter2DIso"]->Fill(goodTightElectrons.size(),evtwt*toptagsf*btagsf) ;
+  h1_["nmuAfter2DIso"]->Fill(goodMediumMuons.size(),evtwt*toptagsf*btagsf) ;
 
-  for (vlq::Electron el : goodElectrons ) {
+  for (vlq::Electron el : goodTightElectrons ) {
     h1_["elIsoDRAfter2DIso"] ->Fill(el.getIso03(),evtwt*toptagsf*btagsf) ; 
 
 //fill cleaned electron info
@@ -1492,7 +1533,7 @@ bool VLQAna::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
     leptons_.ECleanedEl             .push_back(el.getE());
   }
 
-  for (vlq::Muon mu : goodMuons ) {
+  for (vlq::Muon mu : goodTightMuons ) {
     h1_["muIsoDRAfter2DIso"] ->Fill(mu.getIso04(),evtwt*toptagsf*btagsf) ;
 
 //fill cleaned muon info 

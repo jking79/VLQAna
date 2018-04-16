@@ -11,11 +11,12 @@ using namespace edm ;
 
 class ElectronMaker {
   public:
-    enum ELECTRONIDTYPES_t {LOOSE, MEDIUM, TIGHT, VETO, HEEP} ; 
+    enum ELECTRONIDTYPES_t {LOOSE, MEDIUM, TIGHT, VETO, HEEP, MVAWP80} ; 
     ElectronMaker (edm::ParameterSet const&, edm::ConsumesCollector && iC) ; 
     ~ElectronMaker () ; 
     void operator () (edm::Event& evt, vlq::ElectronCollection& electrons) ; 
     bool passElId(string WP, bool isEB, float dEtaInSeed, float dPhiIn, float full5x5siee, float HoE, float RelIsoEA, float ooEmooP, bool conv, int missHits, float Dxy, float Dz) ; 
+    bool passElMvaId(string WP, int mvaGPCateg, float mvaGPValue) ; 
 
       private: 
         //double getEleSF(double pt, double eta);
@@ -43,6 +44,8 @@ class ElectronMaker {
         edm::EDGetTokenT<std::vector<float>> t_elvidLoose           ;
         edm::EDGetTokenT<std::vector<float>> t_elvidMedium          ;
         edm::EDGetTokenT<std::vector<float>> t_elvidTight           ;
+        edm::EDGetTokenT<std::vector<float>> t_elvidMvaGPcateg           ;
+        edm::EDGetTokenT<std::vector<float>> t_elvidMvaGPvalue           ;
         edm::EDGetTokenT<std::vector<float>> t_elvidVeto            ;
         edm::EDGetTokenT<std::vector<float>> t_elvidHEEP            ;
         edm::EDGetTokenT<std::vector<float>> t_elmissHits           ;

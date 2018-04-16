@@ -244,7 +244,6 @@ void JetMaker::operator()(edm::Event& evt, vlq::JetCollection& jets) {
       if (pt_gen > 0.) ptsmear = std::max( 0.0, pt_gen + jerscalep4*(pt_reco - pt_gen) )/pt_reco ; 
       else if (jerscalep4 > 1. && pt_reco > 0.) {
         ptsmear = randjer->Gaus(pt_reco, sqrt(jerscalep4*jerscalep4 - 1)*0.2)/pt_reco ; //// Assuming 20% JER
-        std::cout << "ptsmear test: " << ptsmear << std::endl;
       }
       else ptsmear = 1.;
       newJetP4 *= ptsmear ; 
@@ -373,7 +372,6 @@ void JetMaker::operator()(edm::Event& evt, vlq::JetCollection& jets) {
         double jerscalemass = ApplyJERMass(jmrShift_) ; 
         // A 10% W jet mass resolution: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetWtagging#Recommendation_for_13_TeV_data_a
         masssmear = 1 + randjmr->Gaus(0., 0.1)*sqrt(std::max(jerscalemass*jerscalemass - 1, 0.)) ;
-        std::cout << "smear test: " << masssmear << std::endl;
         }
 
       newJetP4.SetVectM(newJetP4.Vect(), newJetP4.Mag()*massCorr*masssmear) ; 

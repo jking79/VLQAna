@@ -24,6 +24,8 @@ ElectronMaker::ElectronMaker (edm::ParameterSet const& iConfig, edm::ConsumesCol
   t_elvidLoose          (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("elvidLooseLabel"))),
   t_elvidMedium         (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("elvidMediumLabel"))),
   t_elvidTight          (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("elvidTightLabel"))),
+  t_elvidMvaGPcateg      (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("elvidMvaGPcategLabel"))),
+  t_elvidMvaGPvalue      (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("elvidMvaGPvalueLabel"))),
   t_elvidVeto           (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("elvidVetoLabel"))),
   t_elvidHEEP           (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("elvidHEEPLabel"))),
   t_elmissHits          (iC.consumes<vector<float>>(iConfig.getParameter<edm::InputTag>("elmissHitsLabel"))),
@@ -39,6 +41,7 @@ ElectronMaker::ElectronMaker (edm::ParameterSet const& iConfig, edm::ConsumesCol
   else if ( elidtypestr == "MEDIUM" ) type_ = MEDIUM ; 
   else if ( elidtypestr == "TIGHT" ) type_ = TIGHT ; 
   else if ( elidtypestr == "VETO" ) type_ = VETO ; 
+  else if ( elidtypestr == "MVAWP80" ) type_ = MVAWP80 ; 
   else edm::LogError(">>>>ERROR>>>>ElectronMaker::ElectronMaker>>>>  WrongElectronIdType: ") << type_<< " Check electron id type !!!" ; 
 }
 
@@ -65,6 +68,8 @@ void ElectronMaker::operator () (edm::Event& evt, vlq::ElectronCollection& elect
   Handle<vector<float>> h_elvidMedium          ; evt.getByToken(t_elvidMedium         , h_elvidMedium         ); 
   Handle<vector<float>> h_elvidTight           ; evt.getByToken(t_elvidTight          , h_elvidTight          ); 
   Handle<vector<float>> h_elvidVeto            ; evt.getByToken(t_elvidVeto           , h_elvidVeto           ); 
+  Handle<vector<float>> h_elvidMvaGPcateg            ; evt.getByToken(t_elvidMvaGPcateg           , h_elvidMvaGPcateg           ); 
+  Handle<vector<float>> h_elvidMvaGPvalue            ; evt.getByToken(t_elvidMvaGPvalue           , h_elvidMvaGPvalue           ); 
   Handle<vector<float>> h_elvidHEEP            ; evt.getByToken(t_elvidHEEP           , h_elvidHEEP           ); 
   Handle<vector<float>> h_elmissHits           ; evt.getByToken(t_elmissHits          , h_elmissHits          ); 
   Handle<vector<float>> h_elooEmooP            ; evt.getByToken(t_elooEmooP           , h_elooEmooP           ); 
@@ -85,17 +90,21 @@ void ElectronMaker::operator () (edm::Event& evt, vlq::ElectronCollection& elect
     bool   hasMatchedConVeto = (h_elhasMatchedConVeto.product())->at(iel);
     double missHits = (h_elmissHits.product())->at(iel);
     bool   isEB = elscAbsEta <= 1.479 ;
-  
+    int mvaGPCateg = (h_elvidMvaGPcateg.product())->at(iel); 
+    double mvaGPValue = (h_elvidMvaGPvalue.product())->at(iel);
+ 
     bool elisLoose  = passElId("LOOSE" , isEB, dEtaInSeed, dPhiIn, full5x5siee, HoE, elRelIsoEA, ooEmooP, hasMatchedConVeto, missHits, Dxy, Dz);
     bool elisMedium = passElId("MEDIUM", isEB, dEtaInSeed, dPhiIn, full5x5siee, HoE, elRelIsoEA, ooEmooP, hasMatchedConVeto, missHits, Dxy, Dz); 
     bool elisTight  = passElId("TIGHT" , isEB, dEtaInSeed, dPhiIn, full5x5siee, HoE, elRelIsoEA, ooEmooP, hasMatchedConVeto, missHits, Dxy, Dz);  
     bool elisVeto   = passElId("VETO"  , isEB, dEtaInSeed, dPhiIn, full5x5siee, HoE, elRelIsoEA, ooEmooP, hasMatchedConVeto, missHits, Dxy, Dz);  
+    bool elisMvaWP80   = passElMvaId("MVAWP80" , mvaGPCateg, mvaGPValue );  
 
     bool passId(false); 
     if (type_ == LOOSE  && elisLoose ) passId = true ;
     else if (type_ == MEDIUM && elisMedium) passId = true ;
     else if (type_ == TIGHT  && elisTight ) passId = true ;
     else if (type_ == VETO   && elisVeto  ) passId = true ;
+    else if (type_ == MVAWP80  && elisMvaWP80  ) passId = true ;
     else passId = false ; 
     
     if (elPt > elPtMin_ && elPt < elPtMax_ && elscAbsEta < elAbsEtaMax_ && passId ){
@@ -177,3 +186,13 @@ bool ElectronMaker::passElId(string WP, bool isEB, float dEtaInSeed, float dPhiI
 
    return pass;
 } 
+bool ElectronMaker::passElMvaId(string WP, int mvaGPCateg, float mvaGPValue) { 
+
+    bool pass = false ;
+    if (WP == "MVAWP80") {
+        if(mvaGPCateg == 0) pass = (mvaGPValue > 0.941);
+        else if (mvaGPCateg == 1) pass = (mvaGPValue > 0.899);
+        else if (mvaGPCateg == 2) pass = (mvaGPValue > 0.758);
+    }
+    return pass;
+}

@@ -21,9 +21,6 @@ class TtHEventInfoBranches {
     double EvtWtPV_;
     double EvtWtPVLow_;
     double EvtWtPVHigh_;
-    double EvtWtPVAlt_;
-    double EvtWtPVAltLow_;
-    double EvtWtPVAltHigh_;
     double EvtWtHT_;
     double EvtWtHTUp_;
     double EvtWtHTDown_;
@@ -95,6 +92,16 @@ class TtHEventInfoBranches {
     double thrust_ExtraAK4_;
     double thrustminor_ExtraAK4_;
     double cosThetaT_;
+    bool noIsoTightEl_;
+    bool noIsoMVAEl_;
+    bool noIso40TightEl_;
+    bool noIso40MVAEl_;
+    bool noIsoMediumMu_;
+    bool noIsoTightMu_;
+    bool noIsoHighPtMu_;
+    bool noIso40MediumMu_;
+    bool noIso40TightMu_;
+    bool noIso40HighPtMu_;
     std::vector<std::pair<int, double> > lhewts_ ;
     std::vector<double> trigBit_ ;
     std::vector<string> trigName_ ; 
@@ -113,9 +120,6 @@ class TtHEventInfoBranches {
       cutTree->Branch((name+"_EvtWtPV").c_str(), &EvtWtPV_, "EvtWtPV/D");
       cutTree->Branch((name+"_EvtWtPVLow").c_str(), &EvtWtPVLow_, "EvtWtPVLow/D");
       cutTree->Branch((name+"_EvtWtPVHigh").c_str(), &EvtWtPVHigh_, "EvtWtPVHigh/D");
-      cutTree->Branch((name+"_EvtWtPVAlt").c_str(), &EvtWtPVAlt_, "EvtWtPVAlt/D");
-      cutTree->Branch((name+"_EvtWtPVAltLow").c_str(), &EvtWtPVAltLow_, "EvtWtPVAltLow/D");
-      cutTree->Branch((name+"_EvtWtPVAltHigh").c_str(), &EvtWtPVAltHigh_, "EvtWtPVAltHigh/D");
       cutTree->Branch((name+"_EvtWtHT").c_str(), &EvtWtHT_, "EvtWtHT/D");
       cutTree->Branch((name+"_EvtWtHTUp").c_str(), &EvtWtHTUp_, "EvtWtHTUp/D");
       cutTree->Branch((name+"_EvtWtHTDown").c_str(), &EvtWtHTDown_, "EvtWtHTDown/D");
@@ -190,6 +194,16 @@ class TtHEventInfoBranches {
       cutTree->Branch((name+"_thrust_ExtraAK4").c_str(), &thrust_ExtraAK4_, "thrust_ExtraAK4_/D");
       cutTree->Branch((name+"_thrustminor_ExtraAK4").c_str(), &thrustminor_ExtraAK4_, "thrustminor_ExtraAK4_/D");
       cutTree->Branch((name+"_cosThetaT").c_str(), &cosThetaT_, "cosThetaT_/D");
+      cutTree->Branch((name+"_noIsoTightEl").c_str(), &noIsoTightEl_, "noIsoTightEl/O");
+      cutTree->Branch((name+"_noIsoMVAEl").c_str(), &noIsoMVAEl_, "noIsoMVAEl/O");
+      cutTree->Branch((name+"_noIso40TightEl").c_str(), &noIso40TightEl_, "noIso40TightEl/O");
+      cutTree->Branch((name+"_noIso40MVAEl").c_str(), &noIso40MVAEl_, "noIso40MVAEl/O");
+      cutTree->Branch((name+"_noIsoMediumMu").c_str(), &noIsoMediumMu_, "noIsoMediumMu/O");
+      cutTree->Branch((name+"_noIsoTightMu").c_str(), &noIsoTightMu_, "noIsoTightMu/O");
+      cutTree->Branch((name+"_noIsoHighPtMu").c_str(), &noIsoHighPtMu_, "noIsoHighPtMu/O");
+      cutTree->Branch((name+"_noIso40MediumMu").c_str(), &noIso40MediumMu_, "noIso40MediumMu/O");
+      cutTree->Branch((name+"_noIso40TightMu").c_str(), &noIso40TightMu_, "noIso40TightMu/O");
+      cutTree->Branch((name+"_noIso40HighPtMu").c_str(), &noIso40HighPtMu_, "noIso40HighPtMu/O");
 
     }
 
