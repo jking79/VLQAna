@@ -1,48 +1,51 @@
-#ifndef DILEPTONCANDSPRODUCER_HH
-#define DILEPTONCANDSPRODUCER_HH
+#ifndef ANALYSIS_VLQANA_DILEPTONCANDSPRODUCER_HH
+#define ANALYSIS_VLQANA_DILEPTONCANDSPRODUCER_HH
 
+#include <iostream>
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "AnalysisDataFormats/BoostedObjects/interface/Candidate.h"
 
-template <class T>
+using namespace std;
+
 class DileptonCandsProducer {
   public:
-    DileptonCandsProducer (edm::ParameterSet const& iConfig, const T& lp, const T& lm) : 
+    DileptonCandsProducer (edm::ParameterSet const& iConfig) : 
       massMin_(iConfig.getParameter<double> ("massMin")), 
       massMax_(iConfig.getParameter<double> ("massMax")), 
       ptMin_(iConfig.getParameter<double> ("ptMin")), 
-      ptMax_(iConfig.getParameter<double> ("ptMax")), 
-      lp_(lp), 
-      lm_(lm)
-    {}
+      ptMax_(iConfig.getParameter<double> ("ptMax")),
+      ptMaxLeadingLep_(iConfig.getParameter<double> ("ptMaxLeadingLep")),
+      ptMax2ndLeadingLep_(iConfig.getParameter<double> ("ptMax2ndLeadingLep"))  
+  {}
 
-    void operator () (vlq::CandidateCollection& zcands) {
-
-      for ( auto lp : lp_ ) {
-        for ( auto lm : lm_ ) {
-          TLorentzVector p4lp(lp.getP4()), p4lm(lm.getP4()) ;
-          double mass = (p4lp+p4lm).Mag() ; 
-          double pt = (p4lp+p4lm).Pt() ; 
-          if ( mass > massMin_ && mass < massMax_ && pt > ptMin_ && pt < ptMax_ ) {
-            vlq::Candidate zll(p4lp+p4lm) ; 
-            zcands_.push_back(zll) ; 
-          }
+    template <class T>
+    void operator () (vlq::CandidateCollection& zcands, const T& leptons) {
+      for ( auto l1 = leptons.begin(); l1 != leptons.end(); ++l1) {    
+        for ( auto l2 = std::next(l1); l2 != leptons.end(); ++l2) {          
+           if (l1->getCharge()*l2->getCharge() != -1 ) continue ;
+           //cout << "1st, 2nd lep pt = " << l1->getPt() << " ," << l2->getPt() << endl;   
+           if (l1->getPt() < ptMaxLeadingLep_) continue;
+           if (l2->getPt() < ptMax2ndLeadingLep_) continue;  
+           TLorentzVector p4l1(l1->getP4()), p4l2(l2->getP4()) ;
+           double mass = (p4l1+p4l2).Mag() ; 
+           double pt = (p4l1+p4l2).Pt() ; 
+           if ( mass > massMin_ && mass < massMax_ && pt > ptMin_ && pt < ptMax_ ) {                   
+              vlq::Candidate zll(p4l1+p4l2) ; 
+            zcands.push_back(zll) ; 
+           }
         }
       }
-      zcands = zcands_ ;
-
       return ;
     }
 
     ~DileptonCandsProducer () {}  
 
   private:
-    vlq::CandidateCollection zcands_ ;
     double massMin_ ;
     double massMax_ ; 
     double ptMin_ ; 
     double ptMax_ ; 
-    T lp_ ;
-    T lm_ ;
+    double ptMaxLeadingLep_;
+    double ptMax2ndLeadingLep_;
 }; 
 #endif 

@@ -29,8 +29,8 @@ def main():
                     metavar="OUTPUT_DIR")
 
   parser.add_option("-a", "--analyzer_module", dest="analyzer_module",
-                    help="Name of the analyzer module (This parameter is optional and is set to 'ana' by default)",
-                    default='ana',
+                    help="Name of the analyzer module (This parameter is optional and is set to '' by default)",
+                    default='',
                     metavar="ANALYZER_MODULE")
 
   (options, args) = parser.parse_args()
@@ -108,9 +108,10 @@ def main():
 
       # open input ROOT file
       root_file = TFile(input_root_file)
-      htemp = root_file.Get(os.path.join(options.analyzer_module,'cutflow'))
-      nEventsAll = htemp.GetBinContent(1)
-      nEventsStored = htemp.GetBinContent(1)
+      hall = root_file.Get(os.path.join('allEvents','hEventCount_wt'))
+      nEventsAll = hall.Integral()
+      hstored = root_file.Get(os.path.join('finalEvents','hEventCount_wt'))
+      nEventsStored = hstored.Integral()
       scale = 1.
       if group_xs[group] > 0.:
         if group_L[group] > 0.:
@@ -129,14 +130,14 @@ def main():
         histoName = root_file.Get(options.analyzer_module).GetListOfKeys()[h].GetName()
         #print histoName
         htemp = root_file.Get(os.path.join(options.analyzer_module,histoName))
-        if htemp.InheritsFrom('TH1'):
+        if not htemp.IsA().InheritsFrom('TH1'): continue 
 
-          if histoName not in final_histos.keys():
-              final_histos[histoName] = copy.deepcopy(htemp)
-              final_histos[histoName].SetName(group + '__' + histoName)
-              final_histos[histoName].Scale(scale)
-          else:
-            final_histos[histoName].Add(htemp, scale) 
+        if histoName not in final_histos.keys():
+          final_histos[histoName] = copy.deepcopy(htemp)
+          final_histos[histoName].SetName(group + '__' + histoName)
+          final_histos[histoName].Scale(scale)
+        else:
+          final_histos[histoName].Add(htemp, scale)
 
     output_root_file.cd()
     histos = final_histos.keys()

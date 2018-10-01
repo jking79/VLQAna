@@ -1,6 +1,7 @@
 #ifndef JETID_H
 #define JETID_H
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "PhysicsTools/SelectorUtils/interface/Selector.h"
@@ -15,30 +16,55 @@ class JetID : public Selector<int>  {
   public: // interface
 
     enum Version_t { FIRSTDATA, N_VERSIONS };
-    enum Quality_t { LOOSE, TIGHT, N_QUALITY};
+    enum Quality_t { LOOSE, TIGHT, TIGHTLEPVETO, N_QUALITY};
 
     JetID() {}
     JetID(JetID&) {} 
 
-    JetID( edm::ParameterSet const & params ) : 
+    JetID( edm::ParameterSet const & params, edm::ConsumesCollector & iC ) : 
       l_jetPt              (params.getParameter<edm::InputTag> ("jetPtLabel")),                   
       l_jetEta             (params.getParameter<edm::InputTag> ("jetEtaLabel")),                  
       l_jetPhi             (params.getParameter<edm::InputTag> ("jetPhiLabel")),                   
-      l_jetMass            (params.getParameter<edm::InputTag> ("jetMassLabel")),                 
+      //l_jetMass            (params.getParameter<edm::InputTag> ("jetMassLabel")),                 
       l_jetEnergy          (params.getParameter<edm::InputTag> ("jetEnergyLabel")),               
-      l_jetFlavour         (params.getParameter<edm::InputTag> ("jetFlavourLabel")),                  
+      l_jetPartonFlavour   (params.getParameter<edm::InputTag> ("jetPartonFlavourLabel")),                  
+      l_jetHadronFlavour   (params.getParameter<edm::InputTag> ("jetHadronFlavourLabel")),                  
       l_jetCSV             (params.getParameter<edm::InputTag> ("jetCSVLabel")),              
       l_jetJEC             (params.getParameter<edm::InputTag> ("jetJECLabel")),           
       l_jetnHadEnergy      (params.getParameter<edm::InputTag> ("jetnHadEnergyLabel")),          
       l_jetnEMEnergy       (params.getParameter<edm::InputTag> ("jetnEMEnergyLabel")),         
-      l_jetHFHadronEnergy  (params.getParameter<edm::InputTag> ("jetHFHadronEnergyLabel")),      
+      //l_jetHFHadronEnergy  (params.getParameter<edm::InputTag> ("jetHFHadronEnergyLabel")),      
       l_jetcHadEnergy      (params.getParameter<edm::InputTag> ("jetcHadEnergyLabel")),          
       l_jetcEMEnergy       (params.getParameter<edm::InputTag> ("jetcEMEnergyLabel")),            
-      l_jetnumDaughters    (params.getParameter<edm::InputTag> ("jetnumDaughtersLabel")),             
+      //l_jetnumDaughters    (params.getParameter<edm::InputTag> ("jetnumDaughtersLabel")),             
       l_jetcMultip         (params.getParameter<edm::InputTag> ("jetcMultipLabel")),              
+      l_jetnMultip         (params.getParameter<edm::InputTag> ("jetnMultipLabel")),              
+      l_jetMuonEnergy      (params.getParameter<edm::InputTag> ("jetMuonEnergyLabel")),              
       l_jetY               (params.getParameter<edm::InputTag> ("jetYLabel")),                      
       l_jetArea            (params.getParameter<edm::InputTag> ("jetAreaLabel"))                         
   {
+
+    iC.consumes<vector<float>> (l_jetPt             );
+    iC.consumes<vector<float>> (l_jetEta            );
+    iC.consumes<vector<float>> (l_jetPhi            );
+    //iC.consumes<vector<float>> (l_jetMass           );
+    iC.consumes<vector<float>> (l_jetEnergy         );
+    iC.consumes<vector<float>> (l_jetPartonFlavour  );
+    iC.consumes<vector<float>> (l_jetHadronFlavour  );
+    iC.consumes<vector<float>> (l_jetCSV            );
+    iC.consumes<vector<float>> (l_jetJEC            );
+    iC.consumes<vector<float>> (l_jetnHadEnergy     );
+    iC.consumes<vector<float>> (l_jetnEMEnergy      );
+    //iC.consumes<vector<float>> (l_jetHFHadronEnergy );
+    iC.consumes<vector<float>> (l_jetcHadEnergy     );
+    iC.consumes<vector<float>> (l_jetcEMEnergy      );
+    //iC.consumes<vector<float>> (l_jetnumDaughters   );
+    iC.consumes<vector<float>> (l_jetcMultip        );
+    iC.consumes<vector<float>> (l_jetnMultip        );
+    iC.consumes<vector<float>> (l_jetMuonEnergy     );
+    iC.consumes<vector<float>> (l_jetY              );
+    iC.consumes<vector<float>> (l_jetArea           );
+
     std::string versionStr = params.getParameter<std::string>("version");
     std::string qualityStr = params.getParameter<std::string>("quality");
 
@@ -49,6 +75,7 @@ class JetID : public Selector<int>  {
 
     if      ( qualityStr == "LOOSE") quality_ = LOOSE;
     else if ( qualityStr == "TIGHT") quality_ = TIGHT;
+    else if ( qualityStr == "TIGHTLEPVETO") quality_ = TIGHTLEPVETO;
     else quality_ = LOOSE;
 
     push_back("CHF" );
@@ -57,7 +84,7 @@ class JetID : public Selector<int>  {
     push_back("NEF" );
     push_back("NCH" );
     push_back("nConstituents");
-
+    push_back("MUE");
 
     // Set some default cuts for LOOSE, TIGHT
     if ( quality_ == LOOSE ) {
@@ -74,8 +101,14 @@ class JetID : public Selector<int>  {
       set("NEF", 0.9);
       set("NCH", 0);
       set("nConstituents", 1);      
+    } else if ( quality_ == TIGHTLEPVETO ) {
+      set("CHF", 0.0);
+      set("NHF", 0.9);
+      set("CEF", 0.9);
+      set("NEF", 0.9);
+      set("NCH", 0);
+      set("MUE", 0.8);      
     }
-
 
     // Now check the configuration to see if the user changed anything
     if ( params.exists("CHF") ) set("CHF", params.getParameter<double>("CHF") );
@@ -84,10 +117,10 @@ class JetID : public Selector<int>  {
     if ( params.exists("NEF") ) set("NEF", params.getParameter<double>("NEF") );
     if ( params.exists("NCH") ) set("NCH", params.getParameter<int>   ("NCH") );
     if ( params.exists("nConstuents") ) set("nConstituents", params.getParameter<int> ("nConstituents") );
+    if ( params.exists("MUE") ) set("MUE", params.getParameter<double> ("MUE") );
 
     if ( params.exists("cutsToIgnore") )
       setIgnoredCuts( params.getParameter<std::vector<std::string> >("cutsToIgnore") );
-
 
     indexNConstituents_ = index_type (&bits_, "nConstituents");
     indexNEF_ = index_type (&bits_, "NEF");
@@ -95,11 +128,11 @@ class JetID : public Selector<int>  {
     indexCEF_ = index_type (&bits_, "CEF");
     indexCHF_ = index_type (&bits_, "CHF");
     indexNCH_ = index_type (&bits_, "NCH");
+    indexMUE_ = index_type (&bits_, "MUE");
 
     retInternal_ = getBitTemplate();
 
   }
-
 
     JetID( Version_t version, Quality_t quality) :
       version_(version), 
@@ -112,7 +145,7 @@ class JetID : public Selector<int>  {
     push_back("NEF" );
     push_back("NCH" );
     push_back("nConstituents");
-
+    push_back("MUE");
 
     // Set some default cuts for LOOSE, TIGHT
     if ( quality_ == LOOSE ) {
@@ -129,6 +162,14 @@ class JetID : public Selector<int>  {
       set("NEF", 0.9);
       set("NCH", 0);
       set("nConstituents", 1);      
+    } else if ( quality_ == TIGHTLEPVETO ) {
+      set("CHF", 0.0);
+      set("NHF", 0.9);
+      set("CEF", 0.99);
+      set("NEF", 0.9);
+      set("NCH", 0);
+      set("nConstituents", 1);      
+      set("MUE", 0.8);      
     }
 
 
@@ -138,10 +179,10 @@ class JetID : public Selector<int>  {
     indexCEF_ = index_type (&bits_, "CEF");
     indexCHF_ = index_type (&bits_, "CHF");
     indexNCH_ = index_type (&bits_, "NCH");
+    indexMUE_ = index_type (&bits_, "MUE");
 
     retInternal_ = getBitTemplate();   
   }
-
 
     // 
     // Accessor from PAT jets
@@ -172,45 +213,52 @@ class JetID : public Selector<int>  {
       ret.set(false);
 
       // cache some variables
-      double chf = 0.0;
-      double nhf = 0.0;
-      double cef = 0.0;
-      double nef = 0.0;
-      int    nch = 0;
-      int    nconstituents = 0;
+      double chf(0.0);
+      double nhf(0.0);
+      double cef(0.0);
+      double nef(0.0);
+      int    nch(0);
+      int    nnu(0);
+      double mue(0.0);
+      int    nconstituents(0);
 
       Handle <vector<float>>  h_jetPt             ; evt.getByLabel (l_jetPt               , h_jetPt             );
       Handle <vector<float>>  h_jetEta            ; evt.getByLabel (l_jetEta              , h_jetEta            );
       Handle <vector<float>>  h_jetPhi            ; evt.getByLabel (l_jetPhi              , h_jetPhi            );
-      Handle <vector<float>>  h_jetMass           ; evt.getByLabel (l_jetMass             , h_jetMass           );
+      //Handle <vector<float>>  h_jetMass           ; evt.getByLabel (l_jetMass             , h_jetMass           );
       Handle <vector<float>>  h_jetEnergy         ; evt.getByLabel (l_jetEnergy           , h_jetEnergy         );
-      Handle <vector<float>>  h_jetFlavour        ; evt.getByLabel (l_jetFlavour          , h_jetFlavour        );
+      Handle <vector<float>>  h_jetPartonFlavour  ; evt.getByLabel (l_jetPartonFlavour    , h_jetPartonFlavour  );
+      Handle <vector<float>>  h_jetHadronFlavour  ; evt.getByLabel (l_jetHadronFlavour    , h_jetHadronFlavour  );
       Handle <vector<float>>  h_jetCSV            ; evt.getByLabel (l_jetCSV              , h_jetCSV            );
       Handle <vector<float>>  h_jetJEC            ; evt.getByLabel (l_jetJEC              , h_jetJEC            );
       Handle <vector<float>>  h_jetnHadEnergy     ; evt.getByLabel (l_jetnHadEnergy       , h_jetnHadEnergy     );
       Handle <vector<float>>  h_jetnEMEnergy      ; evt.getByLabel (l_jetnEMEnergy        , h_jetnEMEnergy      );
-      Handle <vector<float>>  h_jetHFHadronEnergy ; evt.getByLabel (l_jetHFHadronEnergy   , h_jetHFHadronEnergy );
+      //Handle <vector<float>>  h_jetHFHadronEnergy ; evt.getByLabel (l_jetHFHadronEnergy   , h_jetHFHadronEnergy );
       Handle <vector<float>>  h_jetcHadEnergy     ; evt.getByLabel (l_jetcHadEnergy       , h_jetcHadEnergy     );
       Handle <vector<float>>  h_jetcEMEnergy      ; evt.getByLabel (l_jetcEMEnergy        , h_jetcEMEnergy      );
-      Handle <vector<float>>  h_jetnumDaughters   ; evt.getByLabel (l_jetnumDaughters     , h_jetnumDaughters   );
+      //Handle <vector<float>>  h_jetnumDaughters   ; evt.getByLabel (l_jetnumDaughters     , h_jetnumDaughters   );
       Handle <vector<float>>  h_jetcMultip        ; evt.getByLabel (l_jetcMultip          , h_jetcMultip        );
+      Handle <vector<float>>  h_jetnMultip        ; evt.getByLabel (l_jetnMultip          , h_jetnMultip        );
+      Handle <vector<float>>  h_jetMuonEnergy     ; evt.getByLabel (l_jetMuonEnergy       , h_jetMuonEnergy     );
       Handle <vector<float>>  h_jetY              ; evt.getByLabel (l_jetY                , h_jetY              );
       Handle <vector<float>>  h_jetArea           ; evt.getByLabel (l_jetArea             , h_jetArea           );
 
       TLorentzVector jetP4Raw ; 
-      jetP4Raw.SetPtEtaPhiM( (h_jetPt.product())->at(ijet), 
+      jetP4Raw.SetPtEtaPhiE( (h_jetPt.product())->at(ijet), 
           (h_jetEta.product())->at(ijet), 
           (h_jetPhi.product())->at(ijet), 
-          (h_jetMass.product())->at(ijet) ) ;
-      float jec = (h_jetJEC.product())->at(ijet) ; 
+          (h_jetEnergy.product())->at(ijet) ) ;
+      float jec = 1; //(h_jetJEC.product())->at(ijet) ; 
       jetP4Raw *= jec ; 
       float jeteta = (h_jetEta.product())->at(ijet) ; 
-      chf = (h_jetcHadEnergy.product())->at(ijet)/ jetP4Raw.E() ; 
-      nhf = (h_jetnHadEnergy.product())->at(ijet)/ jetP4Raw.E() ; 
-      cef = (h_jetcEMEnergy.product())->at(ijet) / jetP4Raw.E() ; 
-      nef = (h_jetnEMEnergy.product())->at(ijet) / jetP4Raw.E() ; 
+      chf = (h_jetcHadEnergy.product())->at(ijet);/// jetP4Raw.E() ; 
+      nhf = (h_jetnHadEnergy.product())->at(ijet);/// jetP4Raw.E() ; 
+      cef = (h_jetcEMEnergy.product())->at(ijet) ;/// jetP4Raw.E() ; 
+      nef = (h_jetnEMEnergy.product())->at(ijet) ;/// jetP4Raw.E() ; 
       nch = (h_jetcMultip.product())->at(ijet) ; 
-      nconstituents = (h_jetnumDaughters.product())->at(ijet) ; 
+      nnu = (h_jetnMultip.product())->at(ijet) ; 
+      mue = (h_jetMuonEnergy.product())->at(ijet)/ jetP4Raw.E() ; 
+      nconstituents = nch + nnu ;//(h_jetnumDaughters.product())->at(ijet) ; 
 
       // Cuts for all |eta|:
       if ( ignoreCut(indexNConstituents_) || nconstituents > cut(indexNConstituents_, int() ) ) passCut( ret, indexNConstituents_);
@@ -220,6 +268,7 @@ class JetID : public Selector<int>  {
       if ( ignoreCut(indexCEF_)           || ( cef < cut(indexCEF_, double()) || std::abs(jeteta) > 2.4 ) ) passCut( ret, indexCEF_);
       if ( ignoreCut(indexCHF_)           || ( chf > cut(indexCHF_, double()) || std::abs(jeteta) > 2.4 ) ) passCut( ret, indexCHF_);
       if ( ignoreCut(indexNCH_)           || ( nch > cut(indexNCH_, int())    || std::abs(jeteta) > 2.4 ) ) passCut( ret, indexNCH_);    
+      if ( ignoreCut(indexMUE_)           || ( mue < cut(indexMUE_, double()) || std::abs(jeteta) > 2.4 ) ) passCut( ret, indexMUE_);    
 
       setIgnored( ret );
       return (bool)ret;
@@ -236,13 +285,15 @@ class JetID : public Selector<int>  {
     index_type indexCEF_;
     index_type indexCHF_;
     index_type indexNCH_;
+    index_type indexMUE_;
 
     edm::InputTag l_jetPt              ; 
     edm::InputTag l_jetEta             ; 
     edm::InputTag l_jetPhi             ; 
-    edm::InputTag l_jetMass            ; 
+    //edm::InputTag l_jetMass            ; 
     edm::InputTag l_jetEnergy          ; 
-    edm::InputTag l_jetFlavour         ; 
+    edm::InputTag l_jetPartonFlavour   ; 
+    edm::InputTag l_jetHadronFlavour   ; 
     edm::InputTag l_jetCSV             ; 
     edm::InputTag l_jetJEC             ; 
     edm::InputTag l_jetnHadEnergy      ;
@@ -252,6 +303,8 @@ class JetID : public Selector<int>  {
     edm::InputTag l_jetcEMEnergy       ;
     edm::InputTag l_jetnumDaughters    ;
     edm::InputTag l_jetcMultip         ;
+    edm::InputTag l_jetnMultip         ;
+    edm::InputTag l_jetMuonEnergy      ; 
     edm::InputTag l_jetY               ;
     edm::InputTag l_jetArea            ; 
 };
